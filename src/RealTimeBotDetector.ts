@@ -24,6 +24,7 @@ interface FeatureSet {
 
     // Flags / Ratios
     hasClickWithoutPrecedingEvents: number; // 0 or 1
+    hasClickWithoutMouseMovement: number; // 0 or 1 - clicks without mouse movement before them
     totalMoveEvents: number;
     tabKeyUsage: number; // 0 to 1
     fixedPositionCount: number;
@@ -54,6 +55,7 @@ export class RealTimeBotDetector {
         timeDeltaVariance: 0.3,     
         pathCurvature: 0.25,        
         hasClickWithoutPrecedingEvents: 0.8, 
+        hasClickWithoutMouseMovement: 0.85, // Very strong bot indicator - humans almost always move mouse before clicking
         initialMousePositionAtOrigin: 0.9, // Strong bot indicator
         timeToFirstInteraction: 0.05,
         keyInterEventVariance: 0.04,
@@ -174,8 +176,8 @@ export class RealTimeBotDetector {
         finalScore += curvatureBonus;
 
         // 5. Critical Fail Check
-        // If they clicked without events, do NOT allow redemption to lower score below threshold
-        if (sessionFeatures.hasClickWithoutPrecedingEvents === 1) {
+        // If they clicked without events or without mouse movement, do NOT allow redemption to lower score below threshold
+        if (sessionFeatures.hasClickWithoutPrecedingEvents === 1 || sessionFeatures.hasClickWithoutMouseMovement === 1) {
             finalScore = Math.max(finalScore, 0.8);
         }
 
@@ -208,6 +210,33 @@ export class RealTimeBotDetector {
     
     // Check 3: Zero Dimension Screen (Common in older headless scrapers)
     if (window.screen.width === 0 || window.screen.height === 0) {
+        return true;
+    }
+
+    // Check 4: Automation-related properties that might be exposed
+    // Some automation tools expose properties even after removing webdriver
+    if ((navigator as any).__webdriver_script_fn || (navigator as any).__driver_evaluate || (navigator as any).__webdriver_evaluate) {
+        console.log("Static Detection: Automation script functions detected");
+        return true;
+    }
+
+    // Check 5: Chrome DevTools Protocol indicators
+    // Playwright uses CDP which can leave traces
+    if ((window as any).chrome && (window as any).chrome.runtime) {
+        // Check if runtime object exists but is suspiciously empty or has automation properties
+        const chrome = (window as any).chrome;
+        if (chrome.runtime && typeof chrome.runtime.onConnect === 'undefined') {
+            // Suspicious - real Chrome has onConnect
+            console.log("Static Detection: Suspicious Chrome runtime object");
+            return true;
+        }
+    }
+
+    // Check 6: Missing plugins (headless browsers often have empty plugin arrays)
+    // Note: Modern browsers may have empty plugin arrays, so this is a weak signal
+    // Only flag if it's Chrome and plugins array is completely missing (not just empty)
+    if (navigator.userAgent.includes('Chrome') && !navigator.plugins) {
+        console.log("Static Detection: Chrome with missing plugins array (suspicious)");
         return true;
     }
 
@@ -428,7 +457,9 @@ export class RealTimeBotDetector {
         
         let clickCount = 0;
         let eventPairCount = 0;
+        let clicksWithoutMouseMovement = 0;
         const TIME_WINDOW_MS = 500; // mousedown/mouseup should be within 500ms of click
+        const MOUSE_MOVEMENT_WINDOW_MS = 2000; // Check for mouse movement within 2 seconds before click
         
         for (let i = 0; i < this.eventRecords.length; i++) {
             if (this.eventRecords[i].type === ListenedEvents.MOUSE_CLICK) {
@@ -453,9 +484,41 @@ export class RealTimeBotDetector {
                         break;
                     }
                 }
+                
+                // Check for mouse movement before this click
+                // Look in both eventRecords (for mousemove events) and mouse history
+                let foundMouseMovement = false;
+                
+                // Check event records for mousemove events
+                for (let j = i - 1; j >= 0 && clickTime - this.eventRecords[j].timestamp <= MOUSE_MOVEMENT_WINDOW_MS; j--) {
+                    if (this.eventRecords[j].type === ListenedEvents.MOUSE_MOVE) {
+                        foundMouseMovement = true;
+                        break;
+                    }
+                }
+                
+                // Also check mouse history for movement events near the click time
+                if (!foundMouseMovement && this.fullMouseHistory.length > 0) {
+                    for (let j = this.fullMouseHistory.length - 1; j >= 0; j--) {
+                        const mouseRecord = this.fullMouseHistory[j];
+                        const timeDiff = clickTime - mouseRecord.timestamp;
+                        
+                        if (timeDiff < 0) break; // Mouse event is after click, skip
+                        if (timeDiff > MOUSE_MOVEMENT_WINDOW_MS) break; // Too far back
+                        
+                        // Found a mouse movement within the time window
+                        foundMouseMovement = true;
+                        break;
+                    }
+                }
+                
+                if (!foundMouseMovement) {
+                    clicksWithoutMouseMovement++;
+                }
             }
         }
-        features.hasClickWithoutPrecedingEvents = (clickCount > 0 && eventPairCount < clickCount * 0.5) ? 1 : 0; 
+        features.hasClickWithoutPrecedingEvents = (clickCount > 0 && eventPairCount < clickCount * 0.5) ? 1 : 0;
+        features.hasClickWithoutMouseMovement = (clickCount > 0 && clicksWithoutMouseMovement > 0) ? 1 : 0; 
         
         features.tabKeyUsage = this.keyPressRecords.length > 0 ? this.tabPressCount / this.keyPressRecords.length : 0;
 
@@ -504,6 +567,7 @@ export class RealTimeBotDetector {
 
         // 4. Direct Values
         score += weights.hasClickWithoutPrecedingEvents * features.hasClickWithoutPrecedingEvents;
+        score += weights.hasClickWithoutMouseMovement * features.hasClickWithoutMouseMovement;
         score += weights.initialMousePositionAtOrigin * features.initialMousePositionAtOrigin;
         
         // 5. Inverted TTFI (Low TTFI = High Suspicion)
