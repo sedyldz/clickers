@@ -1,11 +1,18 @@
 import { defineConfig } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
+import { resolve } from 'path';
 
 export default defineConfig({
+  plugins: [tailwindcss()],
   base: './', // Use relative paths - critical for GitHub Pages
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     rollupOptions: {
+      input: {
+        index: resolve(__dirname, 'index.html'),
+        click: resolve(__dirname, 'click.html'),
+      },
       output: {
         // Explicitly ensure .js extension
         entryFileNames: 'assets/[name]-[hash].js',
