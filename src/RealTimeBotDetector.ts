@@ -78,6 +78,9 @@ export class RealTimeBotDetector {
     private BOT_THRESHOLD: number = 0.5;
     private ANALYSIS_INTERVAL_MS: number = 1000; 
     private MAX_NUMBER_OF_REAL_TIME_EVENTS: number = 500; // Sliding window size
+    private MAX_HISTORY_SIZE: number = 10000; // Maximum events in full history
+    private MAX_EVENT_RECORDS: number = 5000; // Maximum event records
+    private MAX_KEY_RECORDS: number = 2000; // Maximum key press records
 
     
     private mouseRecordsBuffer: MouseRecord[] = []; // Sliding window (for graph)
@@ -218,6 +221,10 @@ export class RealTimeBotDetector {
 
         // 2. Add to Full History - For Final Verdict
         this.fullMouseHistory.push(record);
+        // Trim history if too large
+        if (this.fullMouseHistory.length > this.MAX_HISTORY_SIZE) {
+            this.fullMouseHistory.shift();
+        }
         
         if (this.eventRecords.length === 0) {
              this._recordFirstInteraction(ListenedEvents.MOUSE_MOVE, event.target, timestamp);
@@ -227,6 +234,10 @@ export class RealTimeBotDetector {
     private _handleKeyDown(event: KeyboardEvent): void {
         const timestamp = performance.now();
         this.keyPressRecords.push(timestamp);
+        // Trim key records if too large
+        if (this.keyPressRecords.length > this.MAX_KEY_RECORDS) {
+            this.keyPressRecords.shift();
+        }
         
         if (event.key === 'Tab' || event.code === 'Tab') {
             this.tabPressCount++;
@@ -245,6 +256,10 @@ export class RealTimeBotDetector {
             timestamp: this.mousedownTimestamp, 
             isPrecedingEvent: true 
         });
+        // Trim event records if too large
+        if (this.eventRecords.length > this.MAX_EVENT_RECORDS) {
+            this.eventRecords.shift();
+        }
     }
 
     private _handleMouseUp(event: MouseEvent): void {
@@ -255,6 +270,10 @@ export class RealTimeBotDetector {
             timestamp: mouseupTimestamp, 
             isPrecedingEvent: true 
         });
+        // Trim event records if too large
+        if (this.eventRecords.length > this.MAX_EVENT_RECORDS) {
+            this.eventRecords.shift();
+        }
 
         if (this.mousedownTimestamp !== null) {
             this.clickDurations.push(mouseupTimestamp - this.mousedownTimestamp);
@@ -269,6 +288,10 @@ export class RealTimeBotDetector {
             timestamp: performance.now(), 
             isPrecedingEvent: false 
         });
+        // Trim event records if too large
+        if (this.eventRecords.length > this.MAX_EVENT_RECORDS) {
+            this.eventRecords.shift();
+        }
     }
 
     private _recordFirstInteraction(type: string, target: any, timestamp: number) {
@@ -278,6 +301,10 @@ export class RealTimeBotDetector {
             timestamp, 
             isPrecedingEvent: false 
         });
+        // Trim event records if too large
+        if (this.eventRecords.length > this.MAX_EVENT_RECORDS) {
+            this.eventRecords.shift();
+        }
     }
 
     // --- ANALYSIS LOGIC ---
@@ -391,11 +418,31 @@ export class RealTimeBotDetector {
         
         let clickCount = 0;
         let eventPairCount = 0;
+        const TIME_WINDOW_MS = 500; // mousedown/mouseup should be within 500ms of click
+        
         for (let i = 0; i < this.eventRecords.length; i++) {
             if (this.eventRecords[i].type === ListenedEvents.MOUSE_CLICK) {
                 clickCount++;
-                const isPaired = this.eventRecords.slice(Math.max(0, i - 2), i).some(e => e.isPrecedingEvent);
-                if (isPaired) eventPairCount++;
+                const clickEvent = this.eventRecords[i];
+                const clickTime = clickEvent.timestamp;
+                
+                // Look back for mousedown and mouseup within time window and same target
+                let foundMousedown = false;
+                let foundMouseup = false;
+                
+                for (let j = i - 1; j >= 0 && clickTime - this.eventRecords[j].timestamp <= TIME_WINDOW_MS; j--) {
+                    const prevEvent = this.eventRecords[j];
+                    if (prevEvent.type === ListenedEvents.MOUSE_DOWN && prevEvent.target === clickEvent.target) {
+                        foundMousedown = true;
+                    }
+                    if (prevEvent.type === ListenedEvents.MOUSE_UP && prevEvent.target === clickEvent.target) {
+                        foundMouseup = true;
+                    }
+                    if (foundMousedown && foundMouseup) {
+                        eventPairCount++;
+                        break;
+                    }
+                }
             }
         }
         features.hasClickWithoutPrecedingEvents = (clickCount > 0 && eventPairCount < clickCount * 0.5) ? 1 : 0; 
