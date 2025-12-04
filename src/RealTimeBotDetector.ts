@@ -24,7 +24,6 @@ interface FeatureSet {
 
     // Flags / Ratios
     hasClickWithoutPrecedingEvents: number; // 0 or 1
-    screenAspectRatioDeviation: number; 
     totalMoveEvents: number;
     tabKeyUsage: number; // 0 to 1
     fixedPositionCount: number;
@@ -57,7 +56,6 @@ export class RealTimeBotDetector {
         timeToFirstInteraction: 0.05,
         keyInterEventVariance: 0.04,
         clickDurationVariance: 0.03,
-        screenAspectRatioDeviation: 0.02,
         fixedPositionCount: 0.01,
         
         // In real-time, we don't give bonuses yet, we just hunt for bots.
@@ -79,8 +77,7 @@ export class RealTimeBotDetector {
 
     private BOT_THRESHOLD: number = 0.5;
     private ANALYSIS_INTERVAL_MS: number = 1000; 
-    private MAX_NUMBER_OF_REAL_TIME_EVENTS: number = 500; 
-    private MIN_EVENTS_FOR_DECISION: number = 60; // Don't judge until we have 60 moves
+    private MAX_NUMBER_OF_REAL_TIME_EVENTS: number = 500; // Sliding window size
 
     
     private mouseRecordsBuffer: MouseRecord[] = []; // Sliding window (for graph)
@@ -96,7 +93,7 @@ export class RealTimeBotDetector {
     private tabPressCount: number = 0;
 
     private highestSuspicionScore: number = 0;
-
+    private _isStaticBot: boolean = false;
     private _analysisTimer: number | null = null;
     private _onUpdateCallback: ((result: SuspicionResult) => void) | null = null;
 
@@ -111,6 +108,11 @@ export class RealTimeBotDetector {
 
     public startTracking(onUpdate?: (result: SuspicionResult) => void): void {
         if (this.tracking) return;
+
+        this._isStaticBot = this._checkStaticSignals();
+        if (this._isStaticBot) {
+            this.highestSuspicionScore = 1.0;
+        }
         
         this._onUpdateCallback = onUpdate || null;
 
@@ -173,6 +175,30 @@ export class RealTimeBotDetector {
             features: sessionFeatures
         };
     }
+
+    private _checkStaticSignals(): boolean {
+    // Check 1: The "I am a robot" flag used by Selenium/Puppeteer
+    if (navigator.webdriver) {
+        console.log("Static Detection: navigator.webdriver is true");
+        return true;
+    }
+
+    // Check 2: User Agent Analysis
+    const ua = navigator.userAgent.toLowerCase();
+    const botKeywords = ['bot', 'crawler', 'spider', 'headless', 'gptbot'];
+    
+    if (botKeywords.some(keyword => ua.includes(keyword))) {
+        console.log("Static Detection: User Agent contains bot keyword");
+        return true;
+    }
+    
+    // Check 3: Zero Dimension Screen (Common in older headless scrapers)
+    if (window.screen.width === 0 || window.screen.height === 0) {
+        return true;
+    }
+
+    return false;
+}
 
     private _handleMouseMove(event: MouseEvent): void {
         const timestamp = performance.now();
@@ -254,17 +280,20 @@ export class RealTimeBotDetector {
     private _runAnalysis(): void {
         if (!this.tracking) return;
 
-        if (this.mouseRecordsBuffer.length < this.MIN_EVENTS_FOR_DECISION) { // Not enough data yet. Send a "Pending" or "Safe" result.
-            if (this._onUpdateCallback) {
-                this._onUpdateCallback({
-                    timestamp: Date.now(),
-                    score: 0, // Force score to 0 (Safe)
-                    isBot: false,
-                    features: {} as FeatureSet // Empty features
-                });
-            }
-            return; // Stop here, don't calculate math on empty arrays
+        if (this._isStaticBot) {
+         if (this._onUpdateCallback) {
+            this._onUpdateCallback({
+                timestamp: Date.now(),
+                score: 1.0,
+                isBot: true,
+                features: { 
+                    speedVariance: 0, 
+                    hasClickWithoutPrecedingEvents: 1 
+                } as any
+            });
         }
+        return;
+    }
 
         // Calculate score based on CURRENT sliding window
         const currentResult = this._generateResult(this.mouseRecordsBuffer);
@@ -360,9 +389,6 @@ export class RealTimeBotDetector {
         features.hasClickWithoutPrecedingEvents = (clickCount > 0 && eventPairCount < clickCount * 0.5) ? 1 : 0; 
         
         features.tabKeyUsage = this.keyPressRecords.length > 0 ? this.tabPressCount / this.keyPressRecords.length : 0;
-        
-        const aspectRatio = window.innerWidth / window.innerHeight;
-        features.screenAspectRatioDeviation = Math.abs(aspectRatio - (16 / 9)); 
 
         return features;
     }
@@ -379,7 +405,6 @@ export class RealTimeBotDetector {
 
         // 2. Direct Values
         score += weights.hasClickWithoutPrecedingEvents * features.hasClickWithoutPrecedingEvents;
-        score += weights.screenAspectRatioDeviation * this._normalizeValue(features.screenAspectRatioDeviation, 0, 1);
         score += weights.fixedPositionCount * this._normalizeValue(features.fixedPositionCount, 0, features.totalMoveEvents || 1);
         
         // 3. Inverted TTFI (Low TTFI = High Suspicion)
