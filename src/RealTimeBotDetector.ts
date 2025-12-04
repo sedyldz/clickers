@@ -142,18 +142,20 @@ export class RealTimeBotDetector {
         document.addEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown, captureOptions);
         document.addEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp, captureOptions);
         document.addEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick, captureOptions);
+
+        // With this change we have three listeners triggered for one event. We need to see if this is needed and what are we benefiting with this.
         
-        // Also listen in bubble phase as backup
-        document.addEventListener(ListenedEvents.MOUSE_MOVE, this._handleMouseMove, { signal });
-        document.addEventListener(ListenedEvents.KEYBOARD_KEY, this._handleKeyDown, { signal });
-        document.addEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown, { signal });
-        document.addEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp, { signal });
-        document.addEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick, { signal });
+        // // Also listen in bubble phase as backup
+        // document.addEventListener(ListenedEvents.MOUSE_MOVE, this._handleMouseMove, { signal });
+        // document.addEventListener(ListenedEvents.KEYBOARD_KEY, this._handleKeyDown, { signal });
+        // document.addEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown, { signal });
+        // document.addEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp, { signal });
+        // document.addEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick, { signal });
         
-        // Intercept clicks at the window level too
-        window.addEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick, captureOptions);
-        window.addEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown, captureOptions);
-        window.addEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp, captureOptions);
+        // // Intercept clicks at the window level too
+        // window.addEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick, captureOptions);
+        // window.addEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown, captureOptions);
+        // window.addEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp, captureOptions);
         
         this.tracking = true;
         
@@ -534,43 +536,74 @@ export class RealTimeBotDetector {
                 }
                 
                 // Check for mouse movement before this click
-                // Look in both eventRecords (for mousemove events) and mouse history
+                // Search fullMouseHistory (where all mouse movements are stored)
                 let foundMouseMovement = false;
+                let mouseWasNearClickLocation = false;
                 
-                // Check event records for mousemove events
-                for (let j = i - 1; j >= 0 && clickTime - this.eventRecords[j].timestamp <= MOUSE_MOVEMENT_WINDOW_MS; j--) {
-                    if (this.eventRecords[j].type === ListenedEvents.MOUSE_MOVE) {
-                        foundMouseMovement = true;
-                        break;
-                    }
+                // Get click target element to extract position if possible
+                const clickTarget = clickEvent.target;
+                let clickX: number | undefined;
+                let clickY: number | undefined;
+                
+                // Try to get click coordinates from the target element
+                if (clickTarget instanceof HTMLElement) {
+                    const rect = clickTarget.getBoundingClientRect();
+                    clickX = rect.left + rect.width / 2;
+                    clickY = rect.top + rect.height / 2;
                 }
                 
-                // Also check mouse history for movement events near the click time
-                if (!foundMouseMovement && this.fullMouseHistory.length > 0) {
+                if (this.fullMouseHistory.length > 0) {
+                    // Search backwards through mouse history
                     for (let j = this.fullMouseHistory.length - 1; j >= 0; j--) {
                         const mouseRecord = this.fullMouseHistory[j];
                         const timeDiff = clickTime - mouseRecord.timestamp;
                         
-                        if (timeDiff < 0) break; // Mouse event is after click, skip
-                        if (timeDiff > MOUSE_MOVEMENT_WINDOW_MS) break; // Too far back
+                        // If mouse event is after the click, continue searching backwards
+                        if (timeDiff < 0) continue;
                         
-                        // Found a mouse movement within the time window
-                        foundMouseMovement = true;
-                        break;
+                        // Check if mouse was near the click location (within 50 pixels)
+                        if (clickX !== undefined && clickY !== undefined) {
+                            const distance = Math.sqrt(
+                                Math.pow(mouseRecord.x - clickX, 2) + 
+                                Math.pow(mouseRecord.y - clickY, 2)
+                            );
+                            if (distance <= 50) {
+                                mouseWasNearClickLocation = true;
+                            }
+                        }
+                        
+                        // If we found a movement within the time window, we're good
+                        if (timeDiff <= MOUSE_MOVEMENT_WINDOW_MS) {
+                            foundMouseMovement = true;
+                            break;
+                        }
+                        
+                        // If we've gone too far back in time, stop searching
+                        if (timeDiff > MOUSE_MOVEMENT_WINDOW_MS) break;
                     }
                 }
                 
-                if (!foundMouseMovement) {
+                // IMPROVED: Don't flag if:
+                // 1. We found recent movement (within 2 seconds), OR
+                // 2. There's a decent amount of mouse history overall (showing the user moved the mouse earlier in the session), OR
+                // 3. The mouse was actually positioned near where the click happened (even if it was a while ago)
+                //    This handles the case where user stops to read/think before clicking
+                const hasReasonableMouseHistory = this.fullMouseHistory.length >= 20;
+                
+                if (!foundMouseMovement && !hasReasonableMouseHistory && !mouseWasNearClickLocation) {
                     clicksWithoutMouseMovement++;
                 }
             }
         }
-        // Enhanced detection: Also flag if clicks happened with very few mouse movements
-        // Real users move the mouse before clicking. Bots often click with minimal/no movement
-        const hasLowMouseActivityBeforeClicks = clickCount > 0 && this.fullMouseHistory.length < clickCount * 10; // Less than 10 mouse moves per click is suspicious
+        // Enhanced detection: Only flag if clicks happened with VERY few mouse movements
+        // Real users move the mouse at some point. But allow for scenarios where they stop to read/click multiple times.
+        // If there's NO mouse history at all and clicks happened, that's definitely a bot
+        // previously: const hasAlmostNoMouseActivity = clickCount > 0 && this.fullMouseHistory.length < clickCount * 10; // Less than 10 mouse moves per click is suspicious
+
+        const hasAlmostNoMouseActivity = clickCount > 0 && this.fullMouseHistory.length < 5; // Less than 5 total moves is extremely suspicious
         
         features.hasClickWithoutPrecedingEvents = (clickCount > 0 && eventPairCount < clickCount * 0.5) ? 1 : 0;
-        features.hasClickWithoutMouseMovement = (clickCount > 0 && (clicksWithoutMouseMovement > 0 || hasLowMouseActivityBeforeClicks)) ? 1 : 0;
+        features.hasClickWithoutMouseMovement = (clickCount > 0 && (clicksWithoutMouseMovement > 0 || hasAlmostNoMouseActivity)) ? 1 : 0;
         
         features.tabKeyUsage = this.keyPressRecords.length > 0 ? this.tabPressCount / this.keyPressRecords.length : 0;
 
