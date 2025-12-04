@@ -1,13 +1,72 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>clickers</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Detection Hackathon Demo</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #444; font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+       
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .stat-label { color: #666; }
+        .stat-val { font-weight: bold; font-family: monospace; }
+
+        .score-container { text-align: center; margin: 20px 0; }
+        .score-big { font-size: 3rem; font-weight: bold; }
+        .score-label { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+       
+        .safe { color: #27ae60; }
+        .sus { color: #f39c12; }  
+        .bot { color: #c0392b; }  
+
+        button {
+            display: block; width: 100%; padding: 15px; margin-top: 20px;
+            background: #2c3e50; color: white; border: none; border-radius: 6px;
+            font-size: 1.2rem; cursor: pointer; transition: background 0.2s;
+        }
+        button:hover { background: #34495e; }
+        button:disabled { background: #95a5a6; cursor: not-allowed; }
+
+
+        #final-section { display: none; border: 2px solid #2c3e50; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🤖 Bot Detection Lab</h1>
+    <p>Move your mouse, type keys (use Tab!), and interact with the page.</p>
+
+    <div class="grid">
+        <div class="card">
+            <h2>Live Monitor (1s Window)</h2>
+            <div class="score-container">
+                <div id="live-score" class="score-big safe">0.00</div>
+                <div class="score-label">Current Suspicion</div>
+            </div>
+            <div id="live-stats">
+                <div class="stat-row">Waiting for input...</div>
+            </div>
+        </div>
+
+        <div id="final-section" class="card">
+            <h2>Final Verdict (Full Session)</h2>
+            <div class="score-container">
+                <div id="final-score" class="score-big">---</div>
+                <div id="final-verdict" class="score-label">---</div>
+            </div>
+            <div id="final-stats"></div>
+        </div>
+    </div>
+
+    <button id="calc-btn">🛑 Calculate My Score</button>
+</div>
+
+<script type="module" src="/src/main.ts"></script>
+
+</body>
 </html>
