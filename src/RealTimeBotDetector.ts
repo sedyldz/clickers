@@ -96,6 +96,8 @@ export class RealTimeBotDetector {
     private _isStaticBot: boolean = false;
     private _analysisTimer: number | null = null;
     private _onUpdateCallback: ((result: SuspicionResult) => void) | null = null;
+    private _abortController: AbortController | null = null;
+
 
     constructor() {
         this._handleMouseMove = this._handleMouseMove.bind(this);
@@ -109,6 +111,10 @@ export class RealTimeBotDetector {
     public startTracking(onUpdate?: (result: SuspicionResult) => void): void {
         if (this.tracking) return;
 
+        this._abortController = new AbortController();
+        const { signal } = this._abortController;
+
+
         this._isStaticBot = this._checkStaticSignals();
         if (this._isStaticBot) {
             this.highestSuspicionScore = 1.0;
@@ -116,11 +122,11 @@ export class RealTimeBotDetector {
         
         this._onUpdateCallback = onUpdate || null;
 
-        document.addEventListener(ListenedEvents.MOUSE_MOVE, this._handleMouseMove);
-        document.addEventListener(ListenedEvents.KEYBOARD_KEY, this._handleKeyDown);
-        document.addEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown);
-        document.addEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp);
-        document.addEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick);
+        document.addEventListener(ListenedEvents.MOUSE_MOVE, this._handleMouseMove, { signal });
+        document.addEventListener(ListenedEvents.KEYBOARD_KEY, this._handleKeyDown, { signal });
+        document.addEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown, { signal });
+        document.addEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp, { signal });
+        document.addEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick, { signal });
         
         this.tracking = true;
         
@@ -132,15 +138,15 @@ export class RealTimeBotDetector {
     public stopTracking(): SuspicionResult {
         if (!this.tracking) return this._generateResult(this.mouseRecordsBuffer);
 
+        // Abort removes all event listeners registered with the signal
+        this._abortController?.abort();
+        this._abortController = null;
+
         if (this._analysisTimer) {
             clearInterval(this._analysisTimer);
             this._analysisTimer = null;
         }
-        document.removeEventListener(ListenedEvents.MOUSE_MOVE, this._handleMouseMove);
-        document.removeEventListener(ListenedEvents.KEYBOARD_KEY, this._handleKeyDown);
-        document.removeEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown);
-        document.removeEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp);
-        document.removeEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick);
+        
         this.tracking = false;
 
 

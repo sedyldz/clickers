@@ -67,6 +67,33 @@
 </div>
 
 <script type="module" src="/src/main.ts"></script>
+<script>
+     const fpPromise = import(
+        "https://procdn.fpjs.sh/v3/vGDELA9LCI2RM9xl2gRb"
+      ).then((FingerprintJS) =>
+        FingerprintJS.load({
+          apiKey: "FoIXwsnRDd3ad0zJWfUV",
+          endpoint: "https://api.stage.fpjs.sh",
+          modules: [
 
+            FingerprintJS.makeConsoleDebugModule(),
+ 
+
+            ],
+        })
+      );
+
+      
+
+      // Get the visitor identifier when you need it.
+      fpPromise
+        .then((fp) => fp.get())
+        .then((result) => {
+          console.log(result, "result");
+        });
+</script>
 </body>
+
+
+
 </html>
