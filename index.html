@@ -68,29 +68,24 @@
 
 <script type="module" src="/src/main.ts"></script>
 <script>
-     const fpPromise = import(
-        "https://procdn.fpjs.sh/v3/vGDELA9LCI2RM9xl2gRb"
+    // Initialize the agent on page load.
+    const fpPromise = import(
+        "https://metrics.sedanuryildiz.com/web/v3/PRLJVpMKNqhuHYqumzjb"
       ).then((FingerprintJS) =>
-        FingerprintJS.load({
-          apiKey: "FoIXwsnRDd3ad0zJWfUV",
-          endpoint: "https://api.stage.fpjs.sh",
-          modules: [
-
-            FingerprintJS.makeConsoleDebugModule(),
- 
-
-            ],
+        FingerprintJS.load({    
+          region: "eu",
         })
       );
 
-      
-
-      // Get the visitor identifier when you need it.
+      // Get the visitorId when you need it.
       fpPromise
         .then((fp) => fp.get())
         .then((result) => {
-          console.log(result, "result");
+          const visitorId = result.visitorId;
+          console.log(visitorId);
         });
+      
+
 </script>
 </body>
 
