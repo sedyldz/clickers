@@ -26,8 +26,8 @@ export function createButton(label: string, options: ButtonOptions = {}) {
     variantClasses = [
       'appearance-none border-none',
       'bg-primary text-primary-foreground',
-      'shadow-[0_0_0_1px_hsl(var(--fpds-color-orange-7)/1),inset_0_1px_rgb(255_255_255/.15),0_1px_2px_rgb(0_0_0/.1)]',
-      'hover:shadow-[0_0_0_1px_hsl(var(--fpds-color-orange-8)/1),inset_0_1px_rgb(255_255_255/.15),0_1px_2px_rgb(0_0_0/.1)]',
+      'shadow-[0_0_0_1px_hsl(var(--fpds-color-orange-8)/1),inset_0_1px_rgb(255_255_255/.15),0_1px_2px_rgb(0_0_0/.1)]',
+      'hover:shadow-[0_0_0_1px_hsl(var(--fpds-color-orange-9)/1),inset_0_1px_rgb(255_255_255/.15),0_1px_2px_rgb(0_0_0/.1)]',
       'active:shadow-[0_0_0_1px_hsl(var(--fpds-color-orange-10)/1)]',
       'hover:bg-primary-hover',
       'active:bg-primary-active active:border-orange-900',

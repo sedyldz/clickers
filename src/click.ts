@@ -1,6 +1,7 @@
 import './tailwind.css';
 import { createHeader } from './components/Header';
 import { createGenericModal } from './components/Modal';
+import { createSidebar } from './components/Sidebar';
 import { createTextField } from './components/TextField';
 
 const app = document.querySelector<HTMLDivElement>('#app');
@@ -21,7 +22,7 @@ const { header } = createHeader({
 
 // Create the main page structure
 const mainPage = document.createElement('div');
-mainPage.className = 'flex flex-col min-h-screen bg-color-white';
+mainPage.className = 'flex flex-col min-h-screen';
 
 // Create signup modal
 const signupModal = createGenericModal({
@@ -56,6 +57,10 @@ const signupModal = createGenericModal({
     resetForm();
   },
 });
+
+// Create sidebar and append to body so it layers under the modal but above main content
+const sidebar = createSidebar();
+document.body.appendChild(sidebar.aside);
 
 // Create form fields
 const nameField = createTextField({
@@ -131,26 +136,49 @@ const resetForm = () => {
 // Append header to page
 mainPage.appendChild(header);
 
-// Create a content section
-const content = document.createElement('section');
-content.className = 'flex-1 flex items-center justify-center px-6 py-20';
+// Create a 12-column grid layout: sidebar (4 cols) + content (8 cols)
+const grid = document.createElement('div');
+grid.className = 'grid grid-cols-12 flex-1';
 
-const contentInner = document.createElement('div');
-contentInner.className = 'text-center max-w-2xl';
+// Static sidebar column for md+ screens
+const sidebarColumn = document.createElement('aside');
+sidebarColumn.className = 'col-span-2 hidden md:block';
+sidebarColumn.innerHTML = `
+  <div class="p-4 bg-color-white border-r border-black/10 rounded-md shadow-sm">
+    <div class="font-medium text-color-gray-1000 mb-2">Navigation</div>
+    <p class="text-sm text-color-gray-700">Sidebar content placeholder.</p>
+    <ul class="mt-4 space-y-2">
+      <li><a class="block px-2 py-1 rounded hover:bg-color-gray-100 cursor-pointer">Dashboard</a></li>
+      <li><a class="block px-2 py-1 rounded hover:bg-color-gray-100 cursor-pointer">Settings</a></li>
+      <li><a class="block px-2 py-1 rounded hover:bg-color-gray-100 cursor-pointer">Profile</a></li>
+    </ul>
+  </div>
+`;
 
-const contentTitle = document.createElement('h2');
-contentTitle.className = 'text-3xl font-bold text-color-gray-1000 mb-4';
-contentTitle.textContent = 'Welcome to Click';
+// Main content column (takes remaining 8 cols)
+const contentColumn = document.createElement('main');
+contentColumn.className = 'col-span-12 md:col-span-10 flex';
 
-const contentDesc = document.createElement('p');
-contentDesc.className = 'text-lg text-color-gray-700 mb-8';
-contentDesc.textContent = 'A simple demo of header, buttons, and modal components built with Tailwind and TypeScript.';
+import('./components/VideoHero').then(({ createVideoHero }) => {
+  const hero = createVideoHero({
+    videoId: 'UEYBysyPTBs',
+    author: 'Fingerprint',
+    title: 'Identification based on mouse movements',
+    description: 'A Fingerprint stream',
+  });
+  contentColumn.appendChild(hero.root);
+}).catch((err) => {
+  // Fallback: simple text if the component fails to load
+  const fallback = document.createElement('div');
+  fallback.className = 'text-center p-6';
+  fallback.textContent = 'Video failed to load.';
+  contentColumn.appendChild(fallback);
+});
 
-contentInner.appendChild(contentTitle);
-contentInner.appendChild(contentDesc);
-content.appendChild(contentInner);
+grid.appendChild(sidebarColumn);
+grid.appendChild(contentColumn);
 
-mainPage.appendChild(content);
+mainPage.appendChild(grid);
 
 // Append modal to page
 // Append modal to BODY (not mainPage) so it appears above all content

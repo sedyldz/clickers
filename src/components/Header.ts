@@ -1,4 +1,5 @@
 import { createButton } from './Button';
+import { createMenuIcon } from './icons';
 
 export interface HeaderOptions {
   onLoginClick?: () => void;
@@ -9,11 +10,22 @@ export function createHeader(options: HeaderOptions = {}) {
   const { onLoginClick, onSignUpClick } = options;
 
   const header = document.createElement('header');
-  header.className = 'flex items-center justify-between px-6 py-4 border-b border-gray-900/10 bg-gray-100/70 bg-blur-md';
+  header.className = 'flex items-center justify-between px-6 py-4 border-b border-gray-900/20 bg-gray-900/0 bg-blur-md';
 
   // Logo container
   const logoContainer = document.createElement('div');
   logoContainer.className = 'flex items-center gap-8';
+
+  // Menu (hamburger) icon for sidebar toggle
+  const menuIcon = createMenuIcon({ size: 20, className: 'w-6 h-6 cursor-pointer text-color-gray-900' });
+  menuIcon.setAttribute('role', 'button');
+  menuIcon.setAttribute('aria-label', 'Open sidebar');
+  menuIcon.addEventListener('click', () => {
+    document.body.classList.toggle('sidebar-open');
+  });
+
+  // Insert the menu icon before the logo
+  logoContainer.appendChild(menuIcon);
 
   const logo = document.createElement('h1');
   logo.className = 'text-3xl uppercase font-bold text-color-primary font-pixel text-orange-700';
