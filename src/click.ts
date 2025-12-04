@@ -157,7 +157,7 @@ sidebarColumn.innerHTML = `
 
 // Main content column (takes remaining 8 cols)
 const contentColumn = document.createElement('main');
-contentColumn.className = 'col-span-12 md:col-span-10 flex';
+contentColumn.className = 'col-span-12 md:col-span-10 flex flex-col';
 
 import('./components/VideoHero').then(({ createVideoHero }) => {
   const hero = createVideoHero({
@@ -173,6 +173,14 @@ import('./components/VideoHero').then(({ createVideoHero }) => {
   fallback.className = 'text-center p-6';
   fallback.textContent = 'Video failed to load.';
   contentColumn.appendChild(fallback);
+});
+
+// Category Section (lazy-loaded)
+import('./components/CategorySection').then(({ createCategorySection }) => {
+  const categorySection = createCategorySection();
+  contentColumn.appendChild(categorySection.root);
+}).catch((err) => {
+  console.error('Failed to load category section:', err);
 });
 
 grid.appendChild(sidebarColumn);

@@ -1,61 +1,144 @@
+import { createCardLive, sampleCardLiveData, type CardLiveData } from './CardLive';
+import { createSidebarNav, defaultNavItems, type NavItem } from './SidebarNav';
+
 export interface SidebarOptions {
-  widthClass?: string; // tailwind width class like 'w-64'
+  width?: string;
+  liveChannels?: CardLiveData[];
+  navItems?: NavItem[];
 }
 
 export function createSidebar(options: SidebarOptions = {}) {
-  const { widthClass = 'w-64' } = options;
+  const {
+    width = '240px',
+    liveChannels = sampleCardLiveData,
+    navItems = defaultNavItems
+  } = options;
 
-  const aside = document.createElement('aside');
-  aside.className = `site-sidebar fixed inset-y-0 left-0 ${widthClass} transform -translate-x-full z-40 bg-color-white border-r border-black/10 shadow-lg overflow-auto`;
-  aside.setAttribute('aria-hidden', 'true');
-  aside.setAttribute('role', 'navigation');
+  // Main sidebar wrapper
+  const wrapper = document.createElement('div');
+  wrapper.id = 'sidebar-wrapper';
+  wrapper.className = `
+    bg-surface-lowest flex shrink-0 flex-col overflow-hidden
+    absolute bottom-0 left-0 top-0 z-[401] h-full
+    xl:relative xl:inset-0 xl:max-h-full
+  `.trim().replace(/\s+/g, ' ');
+  wrapper.style.width = `var(--sidebar-expanded-width, ${width})`;
+  wrapper.setAttribute('data-nosnippet', 'true');
 
-  // Header for sidebar with close button for small screens
-  const header = document.createElement('div');
-  header.className = 'flex items-center justify-between p-4 border-b border-black/10';
-  const title = document.createElement('div');
-  title.className = 'font-medium text-color-gray-1000';
-  title.textContent = 'Navigation';
-  const closeBtn = document.createElement('button');
-  closeBtn.type = 'button';
-  closeBtn.className = 'px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-color-gray-200';
-  closeBtn.textContent = 'Close';
-  closeBtn.addEventListener('click', () => {
-    close();
+  // Navigation section
+  const nav = createSidebarNav(navItems);
+  wrapper.appendChild(nav);
+
+  // Divider
+  const divider1 = document.createElement('div');
+  divider1.className = 'w-full px-3';
+  const dividerLine1 = document.createElement('div');
+  dividerLine1.className = 'bg-outline-decorative h-px w-full';
+  divider1.appendChild(dividerLine1);
+  wrapper.appendChild(divider1);
+
+  // Scrollable content area
+  const scrollArea = document.createElement('div');
+  scrollArea.className = 'no-scrollbar flex h-full max-h-full flex-col overflow-y-auto';
+
+  const contentInner = document.createElement('div');
+  contentInner.className = 'flex h-fit flex-col pb-3';
+
+  // Recommended section
+  const recommendedSection = document.createElement('section');
+  recommendedSection.className = 'flex w-full flex-col p-3';
+
+  // Section header
+  const sectionHeader = document.createElement('div');
+  sectionHeader.className = 'flex h-9 w-full items-center px-1.5 text-sm font-semibold leading-[1.2]';
+  sectionHeader.textContent = 'Recommended';
+  recommendedSection.appendChild(sectionHeader);
+
+  // Add CardLive components
+  liveChannels.forEach((channelData, index) => {
+    const card = createCardLive(channelData);
+    const firstLink = card.querySelector('a');
+    if (firstLink) {
+      firstLink.setAttribute('data-testid', `sidebar-recommended-channel-${index + 1}`);
+    }
+    recommendedSection.appendChild(card);
   });
 
-  header.appendChild(title);
-  header.appendChild(closeBtn);
+  contentInner.appendChild(recommendedSection);
 
-  const content = document.createElement('div');
-  content.className = 'p-4';
-  content.innerHTML = `
-    <p class="text-sm text-color-gray-700">Sidebar content placeholder.</p>
-    <ul class="mt-4 space-y-2">
-      <li><a class="block px-2 py-1 rounded hover:bg-color-gray-100 cursor-pointer">Dashboard</a></li>
-      <li><a class="block px-2 py-1 rounded hover:bg-color-gray-100 cursor-pointer">Settings</a></li>
-      <li><a class="block px-2 py-1 rounded hover:bg-color-gray-100 cursor-pointer">Profile</a></li>
-    </ul>
-  `;
+  // Show More / Show Less controls
+  const controls = document.createElement('div');
+  controls.className = 'mx-3 flex items-center justify-between';
 
-  aside.appendChild(header);
-  aside.appendChild(content);
+  const showMoreLink = document.createElement('a');
+  showMoreLink.className = `
+    group inline-flex gap-1.5 items-center justify-center rounded font-semibold
+    box-border relative transition-all select-none whitespace-nowrap
+    outline-transparent outline-2 outline-offset-2 focus-visible:outline-focusLight
+    bg-transparent text-surface-onSurfaceSecondary !p-0 focus-visible:underline
+    underline-offset-2 px-2 py-1 text-xs hover:text-white
+  `.trim().replace(/\s+/g, ' ');
+  showMoreLink.href = '/browse';
+  showMoreLink.setAttribute('data-state', 'inactive');
+  showMoreLink.setAttribute('data-testid', 'sidebar-show-more-recommended-to-browse');
+
+  const showMoreDivider1 = document.createElement('div');
+  showMoreDivider1.className = 'bg-outline-decorative h-px w-full';
+  const showMoreText = document.createElement('span');
+  showMoreText.textContent = 'Show More';
+  const showMoreDivider2 = document.createElement('div');
+  showMoreDivider2.className = 'bg-outline-decorative h-px w-full';
+
+  showMoreLink.appendChild(showMoreDivider1);
+  showMoreLink.appendChild(showMoreText);
+  showMoreLink.appendChild(showMoreDivider2);
+
+  const showLessBtn = document.createElement('button');
+  showLessBtn.className = `
+    group inline-flex gap-1.5 items-center justify-center rounded font-semibold
+    box-border relative transition-all select-none whitespace-nowrap
+    outline-transparent outline-2 outline-offset-2 focus-visible:outline-focusLight
+    bg-transparent text-surface-onSurfaceSecondary !p-0 focus-visible:underline
+    underline-offset-2 px-2 py-1 text-xs hover:text-white
+  `.trim().replace(/\s+/g, ' ');
+  showLessBtn.setAttribute('dir', 'ltr');
+  showLessBtn.setAttribute('data-testid', 'sidebar-show-less-recommended');
+
+  const showLessDivider1 = document.createElement('div');
+  showLessDivider1.className = 'bg-outline-decorative h-px w-full';
+  const showLessText = document.createElement('span');
+  showLessText.textContent = 'Show Less';
+  const showLessDivider2 = document.createElement('div');
+  showLessDivider2.className = 'bg-outline-decorative h-px w-full';
+
+  showLessBtn.appendChild(showLessDivider1);
+  showLessBtn.appendChild(showLessText);
+  showLessBtn.appendChild(showLessDivider2);
+
+  controls.appendChild(showMoreLink);
+  controls.appendChild(showLessBtn);
+
+  contentInner.appendChild(controls);
+  scrollArea.appendChild(contentInner);
+  wrapper.appendChild(scrollArea);
 
   const open = () => {
-    document.body.classList.add('sidebar-open');
-    aside.setAttribute('aria-hidden', 'false');
+    wrapper.classList.remove('hidden');
   };
 
   const close = () => {
-    document.body.classList.remove('sidebar-open');
-    aside.setAttribute('aria-hidden', 'true');
+    wrapper.classList.add('hidden');
   };
 
   const toggle = () => {
-    document.body.classList.toggle('sidebar-open');
-    const hidden = document.body.classList.contains('sidebar-open') ? 'false' : 'true';
-    aside.setAttribute('aria-hidden', hidden);
+    wrapper.classList.toggle('hidden');
   };
 
-  return { aside, open, close, toggle, content };
+  return {
+    aside: wrapper,
+    open,
+    close,
+    toggle,
+    content: scrollArea
+  };
 }
