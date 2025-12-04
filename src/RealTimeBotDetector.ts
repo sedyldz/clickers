@@ -301,6 +301,12 @@ export class RealTimeBotDetector {
         return;
     }
 
+        // Don't calculate if no event data yet
+        if (this.mouseRecordsBuffer.length === 0 && this.eventRecords.length === 0) {
+            console.log('%c⏳ Waiting for user interaction...', 'color: #f39c12; font-weight: bold;');
+            return;
+        }
+
         // Calculate score based on CURRENT sliding window
         const currentResult = this._generateResult(this.mouseRecordsBuffer);
         
@@ -401,23 +407,39 @@ export class RealTimeBotDetector {
 
     private _calculateScore(features: FeatureSet, weights: Record<keyof FeatureSet, number>): number {
         let score = 0;
-
-        // 1. Inverted Variances (Low Variance = High Suspicion)
-        score += weights.speedVariance * (1 - this._normalizeVariance(features.speedVariance, 0, 100));
-        score += weights.timeDeltaVariance * (1 - this._normalizeVariance(features.timeDeltaVariance, 0, 10));
-        score += weights.pathCurvature * (1 - this._normalizeVariance(features.pathCurvature, 0, 1));
-        score += weights.keyInterEventVariance * (1 - this._normalizeVariance(features.keyInterEventVariance, 0, 100));
-        score += weights.clickDurationVariance * (1 - this._normalizeVariance(features.clickDurationVariance, 0, 100));
-
-        // 2. Direct Values
-        score += weights.hasClickWithoutPrecedingEvents * features.hasClickWithoutPrecedingEvents;
-        score += weights.fixedPositionCount * this._normalizeValue(features.fixedPositionCount, 0, features.totalMoveEvents || 1);
         
-        // 3. Inverted TTFI (Low TTFI = High Suspicion)
+        // Minimum data thresholds - don't judge variance without enough samples
+        const MIN_MOUSE_EVENTS = 20;  // Need at least 20 mouse moves for reliable variance
+        const MIN_KEY_EVENTS = 5;     // Need at least 5 keypresses
+        const MIN_CLICK_EVENTS = 3;   // Need at least 3 clicks
+
+        // 1. Mouse movement variance metrics - ONLY if we have enough data
+        // Without enough data, these contribute 0 (not suspicious)
+        if (features.totalMoveEvents >= MIN_MOUSE_EVENTS) {
+            score += weights.speedVariance * (1 - this._normalizeVariance(features.speedVariance, 0, 100));
+            score += weights.timeDeltaVariance * (1 - this._normalizeVariance(features.timeDeltaVariance, 0, 10));
+            score += weights.pathCurvature * (1 - this._normalizeVariance(features.pathCurvature, 0, 1));
+            score += weights.fixedPositionCount * this._normalizeValue(features.fixedPositionCount, 0, features.totalMoveEvents);
+        }
+        
+        // 2. Keyboard variance - ONLY if enough keypresses
+        if (this.keyPressRecords.length >= MIN_KEY_EVENTS) {
+            score += weights.keyInterEventVariance * (1 - this._normalizeVariance(features.keyInterEventVariance, 0, 100));
+        }
+        
+        // 3. Click duration variance - ONLY if enough clicks
+        if (this.clickDurations.length >= MIN_CLICK_EVENTS) {
+            score += weights.clickDurationVariance * (1 - this._normalizeVariance(features.clickDurationVariance, 0, 100));
+        }
+
+        // 4. Direct Values
+        score += weights.hasClickWithoutPrecedingEvents * features.hasClickWithoutPrecedingEvents;
+        
+        // 5. Inverted TTFI (Low TTFI = High Suspicion)
         const normalizedTTFI = 1 - this._normalizeValue(features.timeToFirstInteraction, 0, 5000);
         score += weights.timeToFirstInteraction * Math.max(0, normalizedTTFI); 
 
-        // 4. Tab Usage (If weight is 0 in realtime, this does nothing. If negative in final, it subtracts.)
+        // 6. Tab Usage (If weight is 0 in realtime, this does nothing. If negative in final, it subtracts.)
         const normalizedTabUsage = this._normalizeValue(features.tabKeyUsage, 0, 0.5);
         score += weights.tabKeyUsage * normalizedTabUsage;
 
