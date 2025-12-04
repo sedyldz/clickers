@@ -27,6 +27,7 @@ interface FeatureSet {
     totalMoveEvents: number;
     tabKeyUsage: number; // 0 to 1
     fixedPositionCount: number;
+    initialMousePositionAtOrigin: number; // 0 or 1 - if mouse starts at (0,0) it's strongly a bot
 }
 
 export interface SuspicionResult {
@@ -53,6 +54,7 @@ export class RealTimeBotDetector {
         timeDeltaVariance: 0.3,     
         pathCurvature: 0.25,        
         hasClickWithoutPrecedingEvents: 0.8, 
+        initialMousePositionAtOrigin: 0.9, // Strong bot indicator
         timeToFirstInteraction: 0.05,
         keyInterEventVariance: 0.04,
         clickDurationVariance: 0.03,
@@ -94,6 +96,7 @@ export class RealTimeBotDetector {
     private pageLoadTime: number = performance.now();
     private tracking: boolean = false;
     private tabPressCount: number = 0;
+    private initialMousePosition: { x: number; y: number } | null = null;
 
     private highestSuspicionScore: number = 0;
     private _isStaticBot: boolean = false;
@@ -117,6 +120,8 @@ export class RealTimeBotDetector {
         this._abortController = new AbortController();
         const { signal } = this._abortController;
 
+        // Reset initial mouse position tracking
+        this.initialMousePosition = null;
 
         this._isStaticBot = this._checkStaticSignals();
         if (this._isStaticBot) {
@@ -212,6 +217,11 @@ export class RealTimeBotDetector {
     private _handleMouseMove(event: MouseEvent): void {
         const timestamp = performance.now();
         const record = { x: event.clientX, y: event.clientY, timestamp };
+
+        // Capture initial mouse position on first move event
+        if (this.initialMousePosition === null) {
+            this.initialMousePosition = { x: event.clientX, y: event.clientY };
+        }
 
         // 1. Add to Sliding Window (Buffer) - For Realtime Graph
         this.mouseRecordsBuffer.push(record);
@@ -449,6 +459,11 @@ export class RealTimeBotDetector {
         
         features.tabKeyUsage = this.keyPressRecords.length > 0 ? this.tabPressCount / this.keyPressRecords.length : 0;
 
+        // Check if initial mouse position was at origin (0,0) - strong bot indicator
+        features.initialMousePositionAtOrigin = (this.initialMousePosition !== null && 
+                                                 this.initialMousePosition.x === 0 && 
+                                                 this.initialMousePosition.y === 0) ? 1 : 0;
+
         return features;
     }
 
@@ -489,6 +504,7 @@ export class RealTimeBotDetector {
 
         // 4. Direct Values
         score += weights.hasClickWithoutPrecedingEvents * features.hasClickWithoutPrecedingEvents;
+        score += weights.initialMousePositionAtOrigin * features.initialMousePositionAtOrigin;
         
         // 5. Inverted TTFI (Low TTFI = High Suspicion)
         const normalizedTTFI = 1 - this._normalizeValue(features.timeToFirstInteraction, 0, 5000);
