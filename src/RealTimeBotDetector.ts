@@ -9,6 +9,8 @@ interface EventRecord {
     target: string | EventTarget;
     timestamp: number;
     isPrecedingEvent: boolean;
+    isTrusted?: boolean; // Real user events have isTrusted: true
+    hasMovementData?: boolean; // Whether the event has movementX/movementY
 }
 
 interface FeatureSet {
@@ -132,11 +134,26 @@ export class RealTimeBotDetector {
         
         this._onUpdateCallback = onUpdate || null;
 
+        // Use capture phase to catch events before they can be stopped
+        const captureOptions = { signal, capture: true };
+        
+        document.addEventListener(ListenedEvents.MOUSE_MOVE, this._handleMouseMove, captureOptions);
+        document.addEventListener(ListenedEvents.KEYBOARD_KEY, this._handleKeyDown, captureOptions);
+        document.addEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown, captureOptions);
+        document.addEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp, captureOptions);
+        document.addEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick, captureOptions);
+        
+        // Also listen in bubble phase as backup
         document.addEventListener(ListenedEvents.MOUSE_MOVE, this._handleMouseMove, { signal });
         document.addEventListener(ListenedEvents.KEYBOARD_KEY, this._handleKeyDown, { signal });
         document.addEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown, { signal });
         document.addEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp, { signal });
         document.addEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick, { signal });
+        
+        // Intercept clicks at the window level too
+        window.addEventListener(ListenedEvents.MOUSE_CLICK, this._handleClick, captureOptions);
+        window.addEventListener(ListenedEvents.MOUSE_DOWN, this._handleMouseDown, captureOptions);
+        window.addEventListener(ListenedEvents.MOUSE_UP, this._handleMouseUp, captureOptions);
         
         this.tracking = true;
         
@@ -161,18 +178,32 @@ export class RealTimeBotDetector {
 
 
         const sessionFeatures = this._calculateFeatures(this.fullMouseHistory);
+        
+        // CRITICAL BOT DETECTION: If stopTracking was called (button clicked) but we captured 0 clicks,
+        // it means the click was synthetic/programmatic and didn't bubble to our listeners
+        const clickEvents = this.eventRecords.filter(r => r.type === ListenedEvents.MOUSE_CLICK).length;
+        
+        // If button was clicked (stopTracking called) but we didn't capture the click, it's a bot
+        if (clickEvents === 0 && this.fullMouseHistory.length < 10) {
+            // Force high suspicion score
+            this.highestSuspicionScore = Math.max(this.highestSuspicionScore, 0.9);
+            sessionFeatures.hasClickWithoutMouseMovement = 1;
+            sessionFeatures.hasClickWithoutPrecedingEvents = 1;
+        }
 
         // 3. Start with the Peak Score (The worst behavior they showed)
         let finalScore = this.highestSuspicionScore;
 
         // 4. Apply Redemption (Negative Weights) based on full session human traits
         // A) Tab Key Bonus
-        const tabBonus = this._normalizeValue(sessionFeatures.tabKeyUsage, 0, 0.5) * this.REDEMPTION_WEIGHTS.tabKeyUsage;
+        const tabUsageNorm = this._normalizeValue(sessionFeatures.tabKeyUsage, 0, 0.5);
+        const tabBonus = tabUsageNorm * this.REDEMPTION_WEIGHTS.tabKeyUsage;
         finalScore += tabBonus; // Adds a negative number (lowers score)
 
         // B) Jitter/Curvature Bonus (High curvature is good)
         // We normalize variance 0-1. High variance (1) * negative weight = score reduction
-        const curvatureBonus = this._normalizeValue(sessionFeatures.pathCurvature, 0, 1) * this.REDEMPTION_WEIGHTS.pathCurvatureBonus;
+        const curvatureNorm = this._normalizeValue(sessionFeatures.pathCurvature, 0, 1);
+        const curvatureBonus = curvatureNorm * this.REDEMPTION_WEIGHTS.pathCurvatureBonus;
         finalScore += curvatureBonus;
 
         // 5. Critical Fail Check
@@ -293,7 +324,9 @@ export class RealTimeBotDetector {
             type: ListenedEvents.MOUSE_DOWN, 
             target: event.target ?? 'document', 
             timestamp: this.mousedownTimestamp, 
-            isPrecedingEvent: true 
+            isPrecedingEvent: true,
+            isTrusted: event.isTrusted,
+            hasMovementData: 'movementX' in event && 'movementY' in event
         });
         // Trim event records if too large
         if (this.eventRecords.length > this.MAX_EVENT_RECORDS) {
@@ -307,7 +340,9 @@ export class RealTimeBotDetector {
             type: ListenedEvents.MOUSE_UP, 
             target: event.target ?? 'document', 
             timestamp: mouseupTimestamp, 
-            isPrecedingEvent: true 
+            isPrecedingEvent: true,
+            isTrusted: event.isTrusted,
+            hasMovementData: 'movementX' in event && 'movementY' in event
         });
         // Trim event records if too large
         if (this.eventRecords.length > this.MAX_EVENT_RECORDS) {
@@ -321,11 +356,17 @@ export class RealTimeBotDetector {
     }
     
     private _handleClick(event: MouseEvent): void {
+        const isTrusted = event.isTrusted;
+        const hasMovementData = 'movementX' in event && 'movementY' in event;
+        const timestamp = performance.now();
+        
         this.eventRecords.push({
             type: ListenedEvents.MOUSE_CLICK, 
             target: event.target ?? 'document', 
-            timestamp: performance.now(), 
-            isPrecedingEvent: false 
+            timestamp: timestamp, 
+            isPrecedingEvent: false,
+            isTrusted: isTrusted,
+            hasMovementData: hasMovementData
         });
         // Trim event records if too large
         if (this.eventRecords.length > this.MAX_EVENT_RECORDS) {
@@ -369,7 +410,6 @@ export class RealTimeBotDetector {
 
         // Don't calculate if no event data yet
         if (this.mouseRecordsBuffer.length === 0 && this.eventRecords.length === 0) {
-            console.log('%c⏳ Waiting for user interaction...', 'color: #f39c12; font-weight: bold;');
             return;
         }
 
@@ -467,6 +507,14 @@ export class RealTimeBotDetector {
                 const clickEvent = this.eventRecords[i];
                 const clickTime = clickEvent.timestamp;
                 
+                // Check if this is an untrusted (synthetic) event - definitive bot indicator
+                // If isTrusted is false, this is a programmatic click (e.g., from Playwright)
+                if (clickEvent.isTrusted === false) {
+                    // Synthetic click - count as both missing events and missing movement
+                    clicksWithoutMouseMovement++;
+                    continue; // Skip further checks, this is definitely a bot
+                }
+                
                 // Look back for mousedown and mouseup within time window and same target
                 let foundMousedown = false;
                 let foundMouseup = false;
@@ -517,8 +565,12 @@ export class RealTimeBotDetector {
                 }
             }
         }
+        // Enhanced detection: Also flag if clicks happened with very few mouse movements
+        // Real users move the mouse before clicking. Bots often click with minimal/no movement
+        const hasLowMouseActivityBeforeClicks = clickCount > 0 && this.fullMouseHistory.length < clickCount * 10; // Less than 10 mouse moves per click is suspicious
+        
         features.hasClickWithoutPrecedingEvents = (clickCount > 0 && eventPairCount < clickCount * 0.5) ? 1 : 0;
-        features.hasClickWithoutMouseMovement = (clickCount > 0 && clicksWithoutMouseMovement > 0) ? 1 : 0; 
+        features.hasClickWithoutMouseMovement = (clickCount > 0 && (clicksWithoutMouseMovement > 0 || hasLowMouseActivityBeforeClicks)) ? 1 : 0;
         
         features.tabKeyUsage = this.keyPressRecords.length > 0 ? this.tabPressCount / this.keyPressRecords.length : 0;
 
