@@ -415,21 +415,29 @@ export class RealTimeBotDetector {
 
         // 1. Mouse movement variance metrics - ONLY if we have enough data
         // Without enough data, these contribute 0 (not suspicious)
+        // 
+        // NORMALIZATION RANGES based on real human behavior:
+        // - speedVariance: humans typically 1-10, bots near 0. Range 0-5 so human ~2 → 0.4 normalized → 0.6 suspicion
+        // - timeDeltaVariance: humans have variable timing. Range 0-50
+        // - pathCurvature: human jitter typically 0.05-0.3. Range 0-0.2 so human ~0.15 → 0.75 normalized → 0.25 suspicion
+        //
         if (features.totalMoveEvents >= MIN_MOUSE_EVENTS) {
-            score += weights.speedVariance * (1 - this._normalizeVariance(features.speedVariance, 0, 100));
-            score += weights.timeDeltaVariance * (1 - this._normalizeVariance(features.timeDeltaVariance, 0, 10));
-            score += weights.pathCurvature * (1 - this._normalizeVariance(features.pathCurvature, 0, 1));
+            score += weights.speedVariance * (1 - this._normalizeVariance(features.speedVariance, 0, 5));
+            score += weights.timeDeltaVariance * (1 - this._normalizeVariance(features.timeDeltaVariance, 0, 50));
+            score += weights.pathCurvature * (1 - this._normalizeVariance(features.pathCurvature, 0, 0.3));
             score += weights.fixedPositionCount * this._normalizeValue(features.fixedPositionCount, 0, features.totalMoveEvents);
         }
         
         // 2. Keyboard variance - ONLY if enough keypresses
+        // Humans have variable typing speed, typically 1000-50000ms² variance
         if (this.keyPressRecords.length >= MIN_KEY_EVENTS) {
-            score += weights.keyInterEventVariance * (1 - this._normalizeVariance(features.keyInterEventVariance, 0, 100));
+            score += weights.keyInterEventVariance * (1 - this._normalizeVariance(features.keyInterEventVariance, 0, 10000));
         }
         
         // 3. Click duration variance - ONLY if enough clicks
+        // Humans hold clicks for variable durations, typically 1000-50000ms² variance
         if (this.clickDurations.length >= MIN_CLICK_EVENTS) {
-            score += weights.clickDurationVariance * (1 - this._normalizeVariance(features.clickDurationVariance, 0, 100));
+            score += weights.clickDurationVariance * (1 - this._normalizeVariance(features.clickDurationVariance, 0, 10000));
         }
 
         // 4. Direct Values
