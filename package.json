@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "postbuild": "touch dist/.nojekyll",
-    "preview": "vite preview"
+    "postbuild": "touch dist/.nojekyll && cp CNAME dist/CNAME 2>/dev/null || true",
+    "preview": "vite preview",
+    "deploy": "npm run build && echo 'Build complete. Deploy the dist/ folder contents to your GitHub Pages branch.'"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
