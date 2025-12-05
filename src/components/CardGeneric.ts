@@ -16,7 +16,7 @@ export function createCardGeneric(data: GenericCardData): HTMLElement {
 
   // Icon container (9/16 aspect ratio with colored background, matching CategoryCard)
   const iconContainer = document.createElement('div');
-  iconContainer.className = `aspect-[9/16] rounded-md overflow-hidden ${backgroundColor} flex items-center justify-center`;
+  iconContainer.className = `relative aspect-[9/16] rounded-md overflow-hidden ${backgroundColor} flex items-center justify-center`;
 
   // Icon
   const iconWrapper = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -28,6 +28,15 @@ export function createCardGeneric(data: GenericCardData): HTMLElement {
     const icon = iconCreator();
     iconContainer.appendChild(icon);
   }
+
+  // Overlay title (cover art effect)
+  const overlayTitle = document.createElement('div');
+  overlayTitle.className = '[writing-mode:vertical-lr] absolute top-4 left-4 -bottom-[20rem] font-pixel text-black leading-none opacity-15 [line-height:0.725]';
+  overlayTitle.textContent = title;
+  overlayTitle.setAttribute('aria-hidden', 'true');
+  overlayTitle.style.fontSize = '48px';
+  overlayTitle.style.mixBlendMode = 'overlay';
+  iconContainer.appendChild(overlayTitle);
 
   // Content section (below the icon)
   const contentSection = document.createElement('div');

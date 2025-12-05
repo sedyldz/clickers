@@ -13,7 +13,7 @@ export const sampleFeatureData: GenericCardData[] = [
     backgroundColor: 'bg-orange-700',
   },
   {
-    title: 'Speed analysis',
+    title: 'Speed metrics',
     description: 'Velocity and acceleration patterns',
     iconName: 'mouse',
     backgroundColor: 'bg-yellow-600',

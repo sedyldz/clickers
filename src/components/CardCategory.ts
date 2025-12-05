@@ -20,7 +20,7 @@ export function createCardCategory(data: CategoryCardData): HTMLElement {
 
   // Image container (colored background with icon)
   const imageContainer = document.createElement('div');
-  imageContainer.className = `aspect-[9/16] rounded-md overflow-hidden ${backgroundColor} flex items-center justify-center`;
+  imageContainer.className = `relative aspect-[9/16] rounded-md overflow-hidden ${backgroundColor} flex items-center justify-center`;
 
   // Icon
   const iconContainer = document.createElement('div');
@@ -34,6 +34,15 @@ export function createCardCategory(data: CategoryCardData): HTMLElement {
   }
 
   imageContainer.appendChild(iconContainer);
+
+  // Overlay name (cover art effect)
+  const overlayName = document.createElement('div');
+  overlayName.className = '[writing-mode:vertical-lr] absolute top-4 left-4 -bottom-[20rem] font-pixel text-black leading-none opacity-15 [line-height:0.725]';
+  overlayName.textContent = categoryName;
+  overlayName.setAttribute('aria-hidden', 'true');
+  overlayName.style.fontSize = '48px';
+  overlayName.style.mixBlendMode = 'overlay';
+  imageContainer.appendChild(overlayName);
 
   // Content section (below the image)
   const contentSection = document.createElement('div');
