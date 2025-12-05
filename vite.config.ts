@@ -10,8 +10,9 @@ export default defineConfig({
     assetsDir: 'assets',
     rollupOptions: {
       input: {
-        index: resolve(__dirname, 'index.html'),
         click: resolve(__dirname, 'click.html'),
+        main: './index.html',
+        visualization: './visualization.html',
       },
       output: {
         // Explicitly ensure .js extension
