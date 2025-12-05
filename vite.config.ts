@@ -1,12 +1,16 @@
 import { defineConfig } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
+import { resolve } from 'path';
 
 export default defineConfig({
+  plugins: [tailwindcss()],
   base: './', // Use relative paths - critical for GitHub Pages
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     rollupOptions: {
       input: {
+        click: resolve(__dirname, 'click.html'),
         main: './index.html',
         visualization: './visualization.html',
       },

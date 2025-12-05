@@ -18,6 +18,7 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -48,9 +49,11 @@ h1 {
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.vanilla:hover {
   filter: drop-shadow(0 0 2em #f7df1eaa);
 }
@@ -74,12 +77,106 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Kick.com Design System Variables */
+:root {
+  --sidebar-expanded-width: 240px;
+  --navbar-height: 60px;
+
+  /* Surface colors */
+  --bg-surface-lowest: #0f0f0f;
+  --bg-outline-decorative: rgba(255, 255, 255, 0.1);
+  --text-surface-onSurface: #ffffff;
+  --text-surface-onSurfaceSecondary: rgba(255, 255, 255, 0.6);
+  --text-subtle: rgba(255, 255, 255, 0.5);
+  --focusLight: #53fc18;
+}
+
+/* Sidebar Styles */
+#sidebar-wrapper {
+  background-color: var(--bg-surface-lowest);
+  color: var(--text-surface-onSurface);
+}
+
+.bg-surface-lowest {
+  background-color: var(--bg-surface-lowest);
+}
+
+.bg-outline-decorative {
+  background-color: var(--bg-outline-decorative);
+}
+
+.text-surface-onSurface {
+  color: var(--text-surface-onSurface);
+}
+
+.text-surface-onSurfaceSecondary {
+  color: var(--text-surface-onSurfaceSecondary);
+}
+
+.text-subtle {
+  color: var(--text-subtle);
+}
+
+.focus-visible\:outline-focusLight:focus-visible {
+  outline-color: var(--focusLight);
+}
+
+/* Hide scrollbar */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Navigation hover effects */
+.state-layer-surface {
+  position: relative;
+}
+
+.state-layer-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  background-color: rgba(255, 255, 255, 0.08);
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.state-layer-surface:hover::before {
+  opacity: 1;
+}
+
+/* Lucide icon sizing */
+.size-7 {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+/* Avatar component styles */
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: white;
+  text-transform: uppercase;
+  user-select: none;
 }
 
 @media (prefers-color-scheme: light) {
@@ -87,9 +184,11 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }
