@@ -16,13 +16,13 @@ export const sampleUseCaseData: GenericCardData[] = [
     title: 'Account takeover',
     description: 'Prevent attacks without hindering UX.',
     iconName: 'userX',
-    backgroundColor: 'bg-red-800',
+    backgroundColor: 'bg-orange-900',
   },
   {
     title: 'SMS fraud',
     description: 'Stop SMS fraud and SMS pumping.',
     iconName: 'phone',
-    backgroundColor: 'bg-orange-900',
+    backgroundColor: 'bg-red-800',
   },
   {
     title: 'New account fraud',
@@ -34,19 +34,19 @@ export const sampleUseCaseData: GenericCardData[] = [
     title: 'Returning user experience',
     description: 'Tailor experiences. Remove friction.',
     iconName: 'sparkles',
-    backgroundColor: 'bg-blue-900',
+    backgroundColor: 'bg-red-900',
   },
   {
     title: 'Account sharing prevention',
     description: 'Convert users into paying customers.',
     iconName: 'users',
-    backgroundColor: 'bg-teal-900',
+    backgroundColor: 'bg-orange-900',
   },
   {
     title: 'Paywall',
     description: 'Eliminate bypass techniques.',
     iconName: 'ban',
-    backgroundColor: 'bg-purple-900',
+    backgroundColor: 'bg-red-800',
   },
 ];
 

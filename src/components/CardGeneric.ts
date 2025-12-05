@@ -14,9 +14,9 @@ export function createCardGeneric(data: GenericCardData): HTMLElement {
   const card = document.createElement('div');
   card.className = 'flex flex-col';
 
-  // Icon container (square aspect ratio with colored background)
+  // Icon container (9/16 aspect ratio with colored background, matching CategoryCard)
   const iconContainer = document.createElement('div');
-  iconContainer.className = `aspect-square rounded-md overflow-hidden ${backgroundColor} flex items-center justify-center`;
+  iconContainer.className = `aspect-[9/16] rounded-md overflow-hidden ${backgroundColor} flex items-center justify-center`;
 
   // Icon
   const iconWrapper = document.createElementNS('http://www.w3.org/2000/svg', 'svg');

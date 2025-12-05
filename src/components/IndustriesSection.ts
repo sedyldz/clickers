@@ -22,19 +22,19 @@ export const sampleIndustryData: GenericCardData[] = [
     title: 'Buy now pay later (BNPL)',
     description: 'Prevent payment fraud',
     iconName: 'clock',
-    backgroundColor: 'bg-green-900',
+    backgroundColor: 'bg-blue-800',
   },
   {
     title: 'Online gaming & gambling',
     description: 'Fair play enforcement',
     iconName: 'gamepad',
-    backgroundColor: 'bg-teal-900',
+    backgroundColor: 'bg-purple-800',
   },
   {
     title: 'Cryptocurrency',
     description: 'Secure digital assets',
     iconName: 'coins',
-    backgroundColor: 'bg-orange-900',
+    backgroundColor: 'bg-blue-900',
   },
 ];
 
