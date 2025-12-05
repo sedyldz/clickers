@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Detector Visualization</title>
+    <link rel="stylesheet" href="/src/visualization.css">
+</head>
+<body>
+    <div id="grid-background"></div>
+    <canvas id="wave-canvas"></canvas>
+    
+    <div id="analytics-panel" class="glass-panel">
+        <div class="panel-header">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <h2>Bot Detection</h2>
+            <div id="audio-indicator" class="indicator"></div>
+        </div>
+        
+        <div class="score-section">
+            <div class="score-header">
+                <span class="stat-label">Suspicion Score</span>
+                <span id="suspicion-score" class="score-value">0%</span>
+            </div>
+            <div class="meter-bar">
+                <div id="meter-fill" class="meter-fill"></div>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+                <div class="stat-content">
+                    <p class="stat-label">Speed Variance</p>
+                    <p class="stat-value" id="speed-variance">0</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                <div class="stat-content">
+                    <p class="stat-label">Time Delta Variance</p>
+                    <p class="stat-value" id="time-delta-variance">0 <span class="unit">ms²</span></p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+                <div class="stat-content">
+                    <p class="stat-label">Path Curvature</p>
+                    <p class="stat-value" id="path-curvature">0</p>
+                    <div class="meter-bar-small">
+                        <div id="curvature-meter" class="meter-fill-small"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+                <div class="stat-content">
+                    <p class="stat-label">Total Move Events</p>
+                    <p class="stat-value" id="total-move-events">0</p>
+                    <div class="meter-bar-small">
+                        <div id="events-meter" class="meter-fill-small"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                <div class="stat-content">
+                    <p class="stat-label">Time to First Action</p>
+                    <p class="stat-value" id="time-to-first">0 <span class="unit">ms</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="warning-flags" class="warning-section" style="display: none;">
+            <svg class="warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div class="warning-content">
+                <span class="warning-title">Suspicious Flags Detected</span>
+                <ul id="warning-list" class="warning-list"></ul>
+            </div>
+        </div>
+        
+        <div class="result-section">
+            <span class="stat-label">Detection Result</span>
+            <div id="detection-result" class="result-badge">
+                <svg class="result-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Human</span>
+            </div>
+        </div>
+    </div>
+    
+    <button id="sample-click-btn" class="sample-click-btn glass-panel">
+        <span class="btn-text">Sample Button</span>
+    </button>
+    
+    <div id="instructions" class="glass-panel instructions">
+        <p>Move mouse to create waves • Bot detection active</p>
+    </div>
+    
+    <script type="module" src="/src/visualization.ts"></script>
+</body>
+</html>
+
