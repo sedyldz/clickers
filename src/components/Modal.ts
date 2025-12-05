@@ -1,3 +1,5 @@
+import { createButton } from './Button';
+
 export interface GenericModalOptions {
   title?: string;
   size?: 'sm' | 'md' | 'lg';
@@ -20,11 +22,7 @@ export function createGenericModal(options: GenericModalOptions = {}) {
   // Root overlay
   const root = document.createElement('div');
   root.className =
-    'fixed inset-0 hidden items-center justify-center bg-black/30 z-50 modal-overlay';
-  // Ensure the overlay has a fallback background and high z-index in case
-  // utility classes or CSS variables are not available yet.
-  root.style.backgroundColor = root.style.backgroundColor || 'rgba(0,0,0,0.3)';
-  root.style.zIndex = root.style.zIndex || '9999';
+    'fixed inset-0 hidden items-center justify-center bg-black/80 z-50 modal-overlay';
 
   // Modal container
   const modal = document.createElement('section');
@@ -35,26 +33,23 @@ export function createGenericModal(options: GenericModalOptions = {}) {
     lg: 'max-w-lg',
   };
 
-  modal.className = `${sizeClasses[size]} w-full mx-4 bg-color-gray-100 rounded-lg border border-black/10 shadow-lg flex flex-col max-h-[90vh]`;
-  // Explicitly set modal background using design system variable as a fallback
-  // so the modal isn't transparent if utility classes aren't applied.
-  modal.style.backgroundColor = modal.style.backgroundColor || 'var(--color-card, hsl(var(--card)))';
+  modal.className = `${sizeClasses[size]} w-full mx-4 bg-gray-1000/60 ring ring-gray-900/40 backdrop-blur-md rounded-lg flex flex-col max-h-[90vh]`;
   modal.role = 'dialog';
   modal.setAttribute('aria-modal', 'true');
 
   // Header
   const header = document.createElement('header');
-  header.className = 'flex items-center justify-between h-11 px-5 border-b border-black/10';
+  header.className = 'flex items-center justify-between h-11 px-5 shadow-[0_1px_hsl(0_0%_100%_/_0.1)]';
 
   const titleEl = document.createElement('h2');
-  titleEl.className = 'text-lg font-medium text-color-gray-1000';
+  titleEl.className = 'text-lg font-medium';
   titleEl.textContent = title;
   header.appendChild(titleEl);
 
   const closeBtn = document.createElement('button');
   closeBtn.type = 'button';
   closeBtn.className =
-    'rounded-full w-8 h-8 flex items-center justify-center hover:bg-color-gray-300 transition-colors text-color-gray-900';
+    'rounded-full flex p-2 items-center justify-center hover:bg-gray-900 transition-colors text-gray-400';
   closeBtn.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" stroke="currentColor" stroke-width="2" fill="none">
       <path d="M18 6 6 18"></path>
@@ -68,28 +63,25 @@ export function createGenericModal(options: GenericModalOptions = {}) {
 
   // Body
   const body = document.createElement('div');
-  body.className = 'flex-1 overflow-y-auto p-6 bg-color-white border-t border-black/10';
+  body.className = 'flex-1 overflow-y-auto p-6';
 
   // Footer
   const footer = document.createElement('footer');
-  footer.className = 'flex items-center justify-between gap-3 p-4 bg-color-gray-100 border-t border-black/10';
+  footer.className = 'flex items-center justify-between gap-3 p-4 shadow-[0_-1px_hsl(0_0%_100%_/_0.1)]';
 
-  const cancelBtn = document.createElement('button');
-  cancelBtn.type = 'button';
-  cancelBtn.className =
-    'px-3 py-2 rounded-md font-medium text-sm bg-color-white text-color-gray-1000 border border-color-gray-400 hover:bg-color-gray-200 transition-colors';
-  cancelBtn.textContent = secondaryLabel;
-  cancelBtn.addEventListener('click', () => {
-    close();
+  // Create buttons using Button component
+  const { button: cancelBtn } = createButton(secondaryLabel, {
+    variant: 'secondary',
+    onClick: () => {
+      close();
+    }
   });
 
-  const submitBtn = document.createElement('button');
-  submitBtn.type = 'button';
-  submitBtn.className =
-    'px-3 py-2 rounded-md font-medium text-sm bg-color-primary text-color-primary-foreground border border-color-orange-800 hover:bg-color-primary-hover transition-colors';
-  submitBtn.textContent = primaryLabel;
-  submitBtn.addEventListener('click', () => {
-    if (onSubmit) onSubmit();
+  const { button: submitBtn } = createButton(primaryLabel, {
+    variant: 'primary',
+    onClick: () => {
+      if (onSubmit) onSubmit();
+    }
   });
 
   footer.appendChild(cancelBtn);

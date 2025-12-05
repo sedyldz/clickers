@@ -63,7 +63,7 @@ const sidebar = createSidebar();
 
 // Create form fields
 const nameField = createTextField({
-  label: 'Full Name',
+  label: 'Name',
   type: 'text',
   placeholder: 'John Doe',
   required: true,
@@ -84,7 +84,7 @@ const usernameField = createTextField({
 });
 
 const dobField = createTextField({
-  label: 'Date of Birth',
+  label: 'Date of birth',
   type: 'date',
   required: true,
   validate: (value: string) => {
@@ -147,7 +147,7 @@ sidebarColumn.appendChild(sidebar.aside);
 
 // Main content column (takes remaining 8 cols)
 const contentColumn = document.createElement('main');
-contentColumn.className = 'col-span-12 md:col-span-10 flex flex-col';
+contentColumn.className = 'col-span-12 md:col-span-10 flex flex-col max-h-[calc(100vh_-_69px)] overflow-y-auto';
 
 import('./components/VideoHero').then(({ createVideoHero }) => {
   const hero = createVideoHero({
@@ -163,6 +163,30 @@ import('./components/VideoHero').then(({ createVideoHero }) => {
   fallback.className = 'text-center p-6';
   fallback.textContent = 'Video failed to load.';
   contentColumn.appendChild(fallback);
+});
+
+// New Features Section (lazy-loaded)
+import('./components/NewFeaturesSection').then(({ createNewFeaturesSection }) => {
+  const section = createNewFeaturesSection();
+  contentColumn.appendChild(section.root);
+}).catch((err) => {
+  console.error('Failed to load new features section:', err);
+});
+
+// Use Cases Section (lazy-loaded)
+import('./components/UseCasesSection').then(({ createUseCasesSection }) => {
+  const section = createUseCasesSection();
+  contentColumn.appendChild(section.root);
+}).catch((err) => {
+  console.error('Failed to load use cases section:', err);
+});
+
+// Industries Section (lazy-loaded)
+import('./components/IndustriesSection').then(({ createIndustriesSection }) => {
+  const section = createIndustriesSection();
+  contentColumn.appendChild(section.root);
+}).catch((err) => {
+  console.error('Failed to load industries section:', err);
 });
 
 // Category Section (lazy-loaded)

@@ -36,8 +36,10 @@ export function createButton(label: string, options: ButtonOptions = {}) {
     ];
   } else if (variant === 'secondary') {
     variantClasses = [
-      'bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-1000',
-      'shadow-[0_0_0_1px_rgb(0_0_0/.12),0_1px_2px_rgb(0_0_0/.1)] active:shadow-[0_0_0_1px_rgb(0_0_0/.12)]',
+      'bg-gray-900/20 hover:bg-gray-900 active:bg-gray-900/80',
+      'shadow-[0_0_0_1px_rgb(255_255_255/.12),0_1px_2px_rgb(255_255_255/.1)]',
+      'hover:shadow-[0_0_0_1px_rgb(255_255_255/.24),0_1px_2px_rgb(255_255_255/.1)]',
+      'active:shadow-[0_0_0_1px_rgb(255_255_255/.24)]',
       'appearance-none',
       'focus:outline-orange-700',
       'disabled:opacity-50 disabled:cursor-not-allowed',

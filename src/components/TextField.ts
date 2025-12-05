@@ -23,17 +23,17 @@ export function createTextField(options: TextFieldOptions = {}) {
 
   // Container
   const container = document.createElement('div');
-  container.className = 'flex flex-col gap-1 mb-4';
+  container.className = 'flex flex-col gap-2 mb-4';
 
   // Label
   if (label) {
     const labelEl = document.createElement('label');
-    labelEl.className = 'text-sm font-medium text-color-gray-1000';
+    labelEl.className = 'text-sm font-medium text-white';
     labelEl.textContent = label;
     if (required) {
       const span = document.createElement('span');
       span.className = 'text-red-500';
-      span.textContent = ' *';
+      // span.textContent = ' *';
       labelEl.appendChild(span);
     }
     container.appendChild(labelEl);
@@ -42,7 +42,7 @@ export function createTextField(options: TextFieldOptions = {}) {
   // Input wrapper
   const wrapper = document.createElement('div');
   wrapper.className =
-    'relative flex items-center border border-color-gray-400 rounded-md bg-color-gray-100 hover:border-color-gray-500 focus-within:border-color-orange-700 focus-within:ring-2 focus-within:ring-color-orange-400 transition-all';
+    'relative flex items-center ring ring-gray-900 bg-gray-900/30 rounded-md hover:border-gray-500 focus-within:border-orange-700 focus-within:ring-2 focus-within:ring-orange-400 transition-all';
 
   // Input
   const input = document.createElement('input');
@@ -52,7 +52,7 @@ export function createTextField(options: TextFieldOptions = {}) {
   input.name = name;
   input.value = value;
   input.className =
-    '[appearance:none] flex-1 bg-white px-3 py-2 text-sm text-color-gray-1000 placeholder-color-gray-600 outline-none shadow-[0_0_0_1px_rgb(0_0_0/0.01),_inset_0_1px_2px_rgb(0_0_0/0.05)] rounded-md p-0';
+    '[appearance:none] flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder-gray-500 outline-none rounded-md';
 
   // Handle date input for locale-aware display
   if (type === 'date') {

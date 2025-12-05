@@ -13,13 +13,13 @@ export function createCategorySection(options: CategorySectionOptions = {}) {
 
   // Section title
   const title = document.createElement('h2');
-  title.className = 'text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6';
-  title.textContent = 'Top Live Categories';
+  title.className = 'text-base font-medium text-white mb-4 md:mb-6';
+  title.textContent = 'Top live categories';
 
   // Grid container
   const grid = document.createElement('div');
   grid.className = `
-    grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4
+    grid grid-cols-8 gap-3 md:gap-4
   `.trim().replace(/\s+/g, ' ');
 
   // Create category cards

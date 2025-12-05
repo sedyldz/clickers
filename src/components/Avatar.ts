@@ -1,37 +1,39 @@
 export interface AvatarProps {
   name: string;
-  backgroundColor?: string;
 }
 
-// Color palette for team members
-const TEAM_COLORS: Record<string, string> = {
-  'Seda': '#FF6B6B',      // Coral Red
-  'Nemanja': '#4ECDC4',   // Turquoise
-  'Steve': '#95E1D3',     // Mint
-  'Dan': '#FFD93D',       // Yellow
-  'Valentin': '#6C5CE7',  // Purple
-  'Catherine': '#FD79A8', // Pink
-  'Ekan': '#74B9FF',      // Light Blue
-  'Gabe': '#A29BFE',      // Lavender
-  'Dusan': '#FF7675',     // Soft Red
-  'Alvin': '#55EFC4',     // Aqua
-  'Melissa': '#FDCB6E'    // Orange
+// Color mapping for team members using Tailwind color families
+// Background uses 800 variant, text uses 200 variant
+const TEAM_COLOR_CLASSES: Record<string, { bg: string; text: string }> = {
+  'Seda': { bg: 'bg-red-800', text: 'text-red-200' },
+  'Nemanja': { bg: 'bg-teal-800', text: 'text-teal-200' },
+  'Steve': { bg: 'bg-green-800', text: 'text-green-200' },
+  'Dan': { bg: 'bg-yellow-800', text: 'text-yellow-200' },
+  'Valentin': { bg: 'bg-purple-800', text: 'text-purple-200' },
+  'Catherine': { bg: 'bg-pink-800', text: 'text-pink-200' },
+  'Ekan': { bg: 'bg-blue-800', text: 'text-blue-200' },
+  'Gabe': { bg: 'bg-purple-800', text: 'text-purple-200' },
+  'Dusan': { bg: 'bg-red-800', text: 'text-red-200' },
+  'Alvin': { bg: 'bg-teal-800', text: 'text-teal-200' },
+  'Melissa': { bg: 'bg-orange-800', text: 'text-orange-200' }
 };
 
-export function getTeamMemberColor(name: string): string {
-  return TEAM_COLORS[name] || '#999999'; // Fallback gray
+export function getTeamMemberColorClasses(name: string): { bg: string; text: string } {
+  return TEAM_COLOR_CLASSES[name] || { bg: 'bg-gray-800', text: 'text-gray-200' };
 }
 
 export function createAvatar(props: AvatarProps): HTMLElement {
-  const { name, backgroundColor } = props;
+  const { name } = props;
 
   // Extract first letter and uppercase it
   const initial = name.charAt(0).toUpperCase();
 
+  // Get color classes for this team member
+  const colors = getTeamMemberColorClasses(name);
+
   // Create avatar container
   const avatar = document.createElement('div');
-  avatar.className = 'avatar relative size-7 shrink-0 rounded-full flex items-center justify-center text-gray-1000';
-  avatar.style.backgroundColor = backgroundColor || getTeamMemberColor(name);
+  avatar.className = `avatar relative size-7 shrink-0 rounded-full flex items-center justify-center ${colors.bg} ${colors.text}`;
 
   // Create text element for initial
   const initialText = document.createElement('span');

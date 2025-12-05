@@ -20,11 +20,11 @@ export function createCardCategory(data: CategoryCardData): HTMLElement {
 
   // Image container (colored background with icon)
   const imageContainer = document.createElement('div');
-  imageContainer.className = `aspect-[16/9] rounded-md overflow-hidden ${backgroundColor} flex items-center justify-center`;
+  imageContainer.className = `aspect-[9/16] rounded-md overflow-hidden ${backgroundColor} flex items-center justify-center`;
 
   // Icon
   const iconContainer = document.createElement('div');
-  iconContainer.className = 'w-12 h-12 text-white opacity-80';
+  iconContainer.className = '';
 
   // Get icon from icon map
   const iconCreator = iconMap[iconName];
@@ -74,7 +74,7 @@ export function createCardCategory(data: CategoryCardData): HTMLElement {
 // Sample data for 8 categories
 export const sampleCategoryData: CategoryCardData[] = [
   {
-    categoryName: 'Fraud Detection',
+    categoryName: 'Fraud detection',
     categorySlug: 'fraud-detection',
     viewerCount: '173.1k',
     viewerCountFull: '173,142',
@@ -86,7 +86,7 @@ export const sampleCategoryData: CategoryCardData[] = [
     ],
   },
   {
-    categoryName: 'Bot Detection',
+    categoryName: 'Bot detection',
     categorySlug: 'bot-detection',
     viewerCount: '142.8k',
     viewerCountFull: '142,837',
@@ -98,7 +98,7 @@ export const sampleCategoryData: CategoryCardData[] = [
     ],
   },
   {
-    categoryName: 'Account Security',
+    categoryName: 'Account security',
     categorySlug: 'account-security',
     viewerCount: '128.5k',
     viewerCountFull: '128,492',
@@ -110,7 +110,7 @@ export const sampleCategoryData: CategoryCardData[] = [
     ],
   },
   {
-    categoryName: 'Payment Protection',
+    categoryName: 'Payment protection',
     categorySlug: 'payment-protection',
     viewerCount: '96.3k',
     viewerCountFull: '96,284',
@@ -122,7 +122,7 @@ export const sampleCategoryData: CategoryCardData[] = [
     ],
   },
   {
-    categoryName: 'Identity Verification',
+    categoryName: 'Identity verification',
     categorySlug: 'identity-verification',
     viewerCount: '84.7k',
     viewerCountFull: '84,691',
@@ -134,20 +134,20 @@ export const sampleCategoryData: CategoryCardData[] = [
     ],
   },
   {
-    categoryName: 'Account Takeover',
+    categoryName: 'Account takeover',
     categorySlug: 'account-takeover',
     viewerCount: '71.2k',
     viewerCountFull: '71,234',
     iconName: 'userX',
     backgroundColor: 'bg-red-800',
     chips: [
-      { label: 'Password reset abuse', variant: 'red' },
+      { label: 'Reset abuse', variant: 'red' },
       { label: 'Social engineering', variant: 'orange' },
       { label: 'Phishing', variant: 'yellow' },
     ],
   },
   {
-    categoryName: 'Login Security',
+    categoryName: 'Login security',
     categorySlug: 'login-security',
     viewerCount: '58.9k',
     viewerCountFull: '58,921',
@@ -159,7 +159,7 @@ export const sampleCategoryData: CategoryCardData[] = [
     ],
   },
   {
-    categoryName: 'User Analytics',
+    categoryName: 'User analytics',
     categorySlug: 'user-analytics',
     viewerCount: '45.6k',
     viewerCountFull: '45,638',

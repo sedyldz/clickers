@@ -1,4 +1,4 @@
-import { createAvatar, getTeamMemberColor } from './Avatar';
+import { createAvatar } from './Avatar';
 
 export interface CardLiveData {
   channelName: string;
@@ -33,8 +33,7 @@ export function createCardLive(data: CardLiveData): HTMLElement {
 
   // Avatar - use Avatar component with initials
   const avatar = createAvatar({
-    name: data.channelName,
-    backgroundColor: getTeamMemberColor(data.channelName)
+    name: data.channelName
   });
 
   // Content wrapper
