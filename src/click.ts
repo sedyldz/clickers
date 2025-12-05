@@ -3,12 +3,51 @@ import { createHeader } from './components/Header';
 import { createGenericModal } from './components/Modal';
 import { createSidebar } from './components/Sidebar';
 import { createTextField } from './components/TextField';
+import { RealTimeBotDetector } from './RealTimeBotDetector';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 
 if (!app) {
   throw new Error('Missing #app root element');
 }
+
+// Initialize bot detector
+const botDetector = new RealTimeBotDetector();
+
+// Create result notification element
+const createResultNotification = (isBot: boolean, score: number) => {
+  const notification = document.createElement('div');
+  // Start with pulsing animation
+  notification.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] px-8 py-6 rounded-lg shadow-2xl text-center font-bold text-2xl animate-pulse ${
+    isBot 
+      ? 'bg-red-600 text-white border-4 border-red-800' 
+      : 'bg-green-600 text-white border-4 border-green-800'
+  }`;
+  notification.style.minWidth = '300px';
+  notification.style.boxShadow = isBot 
+    ? '0 0 30px rgba(220, 38, 38, 0.8), 0 0 60px rgba(220, 38, 38, 0.5)' 
+    : '0 0 30px rgba(22, 163, 74, 0.8), 0 0 60px rgba(22, 163, 74, 0.5)';
+  
+  const message = document.createElement('div');
+  message.textContent = isBot ? "🤖 You're a bot!" : "✅ Welcome human!";
+  notification.appendChild(message);
+  
+  const scoreText = document.createElement('div');
+  scoreText.className = 'text-lg font-normal mt-2';
+  scoreText.textContent = `Bot Score: ${(score * 100).toFixed(1)}%`;
+  notification.appendChild(scoreText);
+  
+  document.body.appendChild(notification);
+  
+  // Stop pulsing after 30 seconds
+  setTimeout(() => {
+    notification.classList.remove('animate-pulse');
+  }, 30000);
+  
+  // Never auto-remove - stays visible until user closes modal or refreshes
+  
+  return notification;
+};
 
 // Create the header
 const { header } = createHeader({
@@ -40,6 +79,17 @@ const signupModal = createGenericModal({
       passwordField.validate();
 
     if (allValid) {
+      // Stop bot tracking and get the result
+      const result = botDetector.stopTracking();
+      
+      console.log('Bot Detection Result:', result);
+      console.log('Is Bot:', result.isBot);
+      console.log('Score:', result.score);
+      console.log('Features:', result.features);
+      
+      // Show result notification (modal stays open)
+      createResultNotification(result.isBot, result.score);
+      
       const formData = {
         name: nameField.getValue(),
         email: emailField.getValue(),
@@ -48,9 +98,13 @@ const signupModal = createGenericModal({
         password: passwordField.getValue(),
       };
       console.log('Form submitted:', formData);
-      alert('Sign up successful! (Demo)');
-      signupModal.close();
-      resetForm();
+      
+      // Log the result but keep modal open to show the notification
+      if (!result.isBot) {
+        console.log('Human verified! Form submission would proceed.');
+      } else {
+        console.warn('Bot detected! Form submission blocked.');
+      }
     }
   },
   onClose: () => {
@@ -207,3 +261,10 @@ mainPage.appendChild(grid);
 document.body.appendChild(signupModal.root);
 
 app.appendChild(mainPage);
+
+// Start bot detection tracking once the page loads
+console.log('Starting bot detection...');
+botDetector.startTracking((result) => {
+  // Optional: Log real-time updates
+  console.log('Real-time bot score:', result.score.toFixed(3));
+});
