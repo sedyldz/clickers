@@ -31,6 +31,24 @@
         button:hover { background: #34495e; }
         button:disabled { background: #95a5a6; cursor: not-allowed; }
 
+        a {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 12px 24px;
+            background: #00d4ff;
+            color: #080a0f;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+        }
+        a:hover {
+            background: #00b8e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+        }
+
 
         #final-section { display: none; border: 2px solid #2c3e50; }
     </style>
@@ -40,6 +58,10 @@
 <div class="container">
     <h1>🤖 Bot Detection Lab</h1>
     <p>Move your mouse, type keys (use Tab!), and interact with the page.</p>
+    
+    <a href="visualization.html">
+        🎨 View Amazing Visualization
+    </a>
 
     <div class="grid">
         <div class="card">
@@ -67,6 +89,28 @@
 </div>
 
 <script type="module" src="/src/main.ts"></script>
+<script>
+    // Initialize the agent on page load.
+    const fpPromise = import(
+        "https://metrics.sedanuryildiz.com/web/v3/PRLJVpMKNqhuHYqumzjb"
+      ).then((FingerprintJS) =>
+        FingerprintJS.load({    
+          region: "eu",
+        })
+      );
 
+      // Get the visitorId when you need it.
+      fpPromise
+        .then((fp) => fp.get())
+        .then((result) => {
+          const visitorId = result.visitorId;
+          console.log(visitorId);
+        });
+      
+
+</script>
 </body>
+
+
+
 </html>
