@@ -14,7 +14,7 @@ export function createHeader(options: HeaderOptions = {}) {
 
   // Logo container
   const logoContainer = document.createElement('div');
-  logoContainer.className = 'flex items-center gap-8';
+  logoContainer.className = 'flex items-center gap-5';
 
   // Menu (hamburger) icon for sidebar toggle
   const menuIcon = createMenuIcon({ size: 20, className: 'w-6 h-6 cursor-pointer text-color-gray-900' });

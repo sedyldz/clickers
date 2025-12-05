@@ -19,7 +19,7 @@ export function createVideoHero(options: VideoHeroOptions) {
   const authorRow = document.createElement('div');
   authorRow.className = 'flex items-center gap-3';
   authorRow.innerHTML = `
-    <div class="size-11 rounded-full bg-black flex items-center justify-center p-2 shrink-0">
+    <div class="size-11 rounded-full bg-orange-900 shadow-[inset_0_0_0_1px_hsl(var(--fpds-color-orange-2)_/_.08)] flex items-center justify-center p-2 shrink-0">
       <svg class="w-7 h-7 text-orange-700" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M6.74999 17.6842C5.59176 16.0313 4.9104 14.0203 4.9104 11.8489C4.9104 9.03693 7.18867 6.75781 9.99896 6.75781C12.8093 6.75781 15.0875 9.03693 15.0875 11.8489" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M11.0578 18.3333C8.89581 16.985 7.45588 14.5854 7.45588 11.8489C7.45588 10.4429 8.59544 9.30339 10.0006 9.30339C11.4057 9.30339 12.5453 10.4429 12.5453 11.8489C12.5453 13.2549 13.6848 14.3945 15.09 14.3945C16.4951 14.3945 17.6347 13.2549 17.6347 11.8489C17.6347 7.63096 14.2169 4.21228 10.0014 4.21228C5.786 4.21228 2.36816 7.63096 2.36816 11.8489C2.36816 12.7891 2.47338 13.7047 2.66684 14.5871" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
@@ -38,12 +38,30 @@ export function createVideoHero(options: VideoHeroOptions) {
   titleEl.className = 'text-sm';
   titleEl.textContent = title;
 
+  // Chips container with fade-out gradient mask
+  const chipsWrapper = document.createElement('div');
+  chipsWrapper.className = 'relative overflow-hidden';
+  chipsWrapper.style.maskImage = 'linear-gradient(to right, black calc(100% - 32px), transparent 100%)';
+  chipsWrapper.style.webkitMaskImage = 'linear-gradient(to right, black calc(100% - 32px), transparent 100%)';
+
+  const chipsContainer = document.createElement('div');
+  chipsContainer.className = 'flex gap-1 overflow-x-auto scrollbar-hide';
+  chipsContainer.innerHTML = `
+    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-900/50 text-red-300 whitespace-nowrap shrink-0">Fraud detection</span>
+    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-900/50 text-orange-300 whitespace-nowrap shrink-0">Bot detection</span>
+    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-900/50 text-blue-300 whitespace-nowrap shrink-0">Account security</span>
+    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-900/50 text-green-300 whitespace-nowrap shrink-0">Payment protection</span>
+  `;
+
+  chipsWrapper.appendChild(chipsContainer);
+
   contentColumn.appendChild(authorRow);
   contentColumn.appendChild(titleEl);
+  contentColumn.appendChild(chipsWrapper);
 
   // Right side - video (simple, clean)
   const videoContainer = document.createElement('div');
-  videoContainer.className = 'flex-1 aspect-video overflow-hidden relative';
+  videoContainer.className = 'flex-[2] aspect-video overflow-hidden relative';
 
   const iframe = document.createElement('iframe');
   iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&playsinline=1`;
