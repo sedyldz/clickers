@@ -6,6 +6,10 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     rollupOptions: {
+      input: {
+        main: './index.html',
+        visualization: './visualization.html',
+      },
       output: {
         // Explicitly ensure .js extension
         entryFileNames: 'assets/[name]-[hash].js',
