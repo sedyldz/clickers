@@ -1,31 +1,30 @@
-import { readFileSync, writeFileSync } from 'fs';
-import { globSync } from 'glob';
+import { readFileSync, writeFileSync, readdirSync } from 'fs';
 
 // Read the built HTML
 let html = readFileSync('dist/visualization.html', 'utf-8');
 
 // Check if paths need fixing (still have /src/ paths)
 if (html.includes('/src/visualization.css') || html.includes('/src/visualization.ts')) {
-  // Find the built CSS and JS files
-  const cssFiles = globSync('dist/assets/visualization-*.css');
-  const jsFiles = globSync('dist/assets/visualization-*.js');
+  // Find the built CSS and JS files using built-in fs
+  const assetsDir = 'dist/assets';
+  const files = readdirSync(assetsDir);
+  
+  const cssFile = files.find(f => f.startsWith('visualization-') && f.endsWith('.css'));
+  const jsFile = files.find(f => f.startsWith('visualization-') && f.endsWith('.js'));
 
-  if (cssFiles.length === 0 || jsFiles.length === 0) {
+  if (!cssFile || !jsFile) {
     console.error('Could not find built assets');
     process.exit(1);
   }
 
-  const cssFile = cssFiles[0].replace('dist/', '');
-  const jsFile = jsFiles[0].replace('dist/', '');
-
   // Replace the paths
   html = html.replace(
     /href="\/src\/visualization\.css"/g,
-    `href="./${cssFile}"`
+    `href="./assets/${cssFile}"`
   );
   html = html.replace(
     /src="\/src\/visualization\.ts"/g,
-    `src="./${jsFile}"`
+    `src="./assets/${jsFile}"`
   );
 
   // Write back
