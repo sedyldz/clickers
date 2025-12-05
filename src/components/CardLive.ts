@@ -92,7 +92,7 @@ export const sampleCardLiveData: CardLiveData[] = [
   {
     channelName: 'Seda',
     channelSlug: 'seda',
-    gameName: 'Just Chatting',
+    gameName: 'Algorithiming',
     viewersShort: '903',
     viewersLabel: '903',
     isLive: true
@@ -100,7 +100,7 @@ export const sampleCardLiveData: CardLiveData[] = [
   {
     channelName: 'Nemanja',
     channelSlug: 'nemanja',
-    gameName: 'Just Chatting',
+    gameName: 'Algorithiming',
     viewersShort: '7.6K',
     viewersLabel: '7559',
     isLive: true
@@ -108,39 +108,31 @@ export const sampleCardLiveData: CardLiveData[] = [
   {
     channelName: 'Steve',
     channelSlug: 'steve',
-    gameName: 'Counter-Strike 2',
+    gameName: 'Interfacing',
     viewersShort: '3.5K',
     viewersLabel: '3490',
     isLive: true
   },
   {
-    channelName: 'Dan',
-    channelSlug: 'dan',
-    gameName: 'Slots & Casino',
-    viewersShort: '12.7K',
-    viewersLabel: '12715',
-    isLive: true
-  },
-  {
     channelName: 'Valentin',
     channelSlug: 'valentin',
-    gameName: 'Just Chatting',
-    viewersShort: '130',
-    viewersLabel: '130',
+    gameName: '10x’ing',
+    viewersShort: '13k',
+    viewersLabel: '13000',
     isLive: true
   },
   {
     channelName: 'Catherine',
     channelSlug: 'catherine',
-    gameName: 'Fortnite',
-    viewersShort: '66',
-    viewersLabel: '66',
+    gameName: 'Orchestrating',
+    viewersShort: '6.6k',
+    viewersLabel: '6623',
     isLive: true
   },
   {
     channelName: 'Ekan',
     channelSlug: 'ekan',
-    gameName: 'Slots & Casino',
+    gameName: 'Orchestrating',
     viewersShort: '2.6K',
     viewersLabel: '2647',
     isLive: true
@@ -148,15 +140,15 @@ export const sampleCardLiveData: CardLiveData[] = [
   {
     channelName: 'Gabe',
     channelSlug: 'gabe',
-    gameName: 'Darts',
-    viewersShort: '59',
-    viewersLabel: '59',
+    gameName: 'Wired in',
+    viewersShort: '259k',
+    viewersLabel: '259,001',
     isLive: true
   },
   {
     channelName: 'Dusan',
     channelSlug: 'dusan',
-    gameName: 'Counter-Strike 2',
+    gameName: 'Productising',
     viewersShort: '3.9K',
     viewersLabel: '3921',
     isLive: true
@@ -164,7 +156,7 @@ export const sampleCardLiveData: CardLiveData[] = [
   {
     channelName: 'Alvin',
     channelSlug: 'alvin',
-    gameName: 'IRL',
+    gameName: 'Growth hacking',
     viewersShort: '796',
     viewersLabel: '796',
     isLive: true
@@ -172,7 +164,7 @@ export const sampleCardLiveData: CardLiveData[] = [
   {
     channelName: 'Melissa',
     channelSlug: 'melissa',
-    gameName: 'Fortnite',
+    gameName: 'Productising',
     viewersShort: '850',
     viewersLabel: '850',
     isLive: true

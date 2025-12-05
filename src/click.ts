@@ -58,9 +58,8 @@ const signupModal = createGenericModal({
   },
 });
 
-// Create sidebar and append to body so it layers under the modal but above main content
+// Create sidebar (will be appended to aside element in grid layout)
 const sidebar = createSidebar();
-document.body.appendChild(sidebar.aside);
 
 // Create form fields
 const nameField = createTextField({
@@ -142,18 +141,9 @@ grid.className = 'grid grid-cols-12 flex-1';
 
 // Static sidebar column for md+ screens
 const sidebarColumn = document.createElement('aside');
-sidebarColumn.className = 'col-span-2 hidden md:block';
-sidebarColumn.innerHTML = `
-  <div class="p-4 bg-color-white border-r border-black/10 rounded-md shadow-sm">
-    <div class="font-medium text-color-gray-1000 mb-2">Navigation</div>
-    <p class="text-sm text-color-gray-700">Sidebar content placeholder.</p>
-    <ul class="mt-4 space-y-2">
-      <li><a class="block px-2 py-1 rounded hover:bg-color-gray-100 cursor-pointer">Dashboard</a></li>
-      <li><a class="block px-2 py-1 rounded hover:bg-color-gray-100 cursor-pointer">Settings</a></li>
-      <li><a class="block px-2 py-1 rounded hover:bg-color-gray-100 cursor-pointer">Profile</a></li>
-    </ul>
-  </div>
-`;
+sidebarColumn.className = 'col-span-2 hidden md:block overflow-y-auto';
+// Append the sidebar component to the aside element
+sidebarColumn.appendChild(sidebar.aside);
 
 // Main content column (takes remaining 8 cols)
 const contentColumn = document.createElement('main');

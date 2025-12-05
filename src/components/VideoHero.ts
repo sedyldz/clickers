@@ -9,10 +9,10 @@ export function createVideoHero(options: VideoHeroOptions) {
   const { videoId, author = 'Fingerprint', title = 'Identification based on mouse movements', description = 'A Fingerprint stream' } = options;
 
   const root = document.createElement('div');
-  root.className = 'w-full';
+  root.className = 'w-full max-h-[50vh]';
 
   const wrapper = document.createElement('div');
-  wrapper.className = 'relative w-full aspect-video overflow-hidden';
+  wrapper.className = 'relative w-full aspect-video max-h-[50vh] overflow-hidden';
 
   const iframe = document.createElement('iframe');
   iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&playsinline=1`;

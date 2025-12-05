@@ -18,11 +18,8 @@ export function createSidebar(options: SidebarOptions = {}) {
   const wrapper = document.createElement('div');
   wrapper.id = 'sidebar-wrapper';
   wrapper.className = `
-    bg-surface-lowest flex shrink-0 flex-col overflow-hidden
-    absolute bottom-0 left-0 top-0 z-[401] h-full
-    xl:relative xl:inset-0 xl:max-h-full
+    bg-surface-lowest flex flex-col overflow-hidden h-full
   `.trim().replace(/\s+/g, ' ');
-  wrapper.style.width = `var(--sidebar-expanded-width, ${width})`;
   wrapper.setAttribute('data-nosnippet', 'true');
 
   // Navigation section

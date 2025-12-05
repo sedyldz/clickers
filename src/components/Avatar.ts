@@ -30,7 +30,7 @@ export function createAvatar(props: AvatarProps): HTMLElement {
 
   // Create avatar container
   const avatar = document.createElement('div');
-  avatar.className = 'avatar relative size-7 shrink-0 rounded-full';
+  avatar.className = 'avatar relative size-7 shrink-0 rounded-full flex items-center justify-center text-gray-1000';
   avatar.style.backgroundColor = backgroundColor || getTeamMemberColor(name);
 
   // Create text element for initial

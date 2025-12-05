@@ -16,15 +16,15 @@ export function createCardCategory(data: CategoryCardData): HTMLElement {
 
   // Main card container
   const card = document.createElement('div');
-  card.className = 'relative aspect-[9/16] rounded-md overflow-hidden';
+  card.className = 'flex flex-col';
 
-  // Colored background
-  const bgLayer = document.createElement('div');
-  bgLayer.className = `absolute inset-0 ${backgroundColor} flex items-center justify-center`;
+  // Image container (colored background with icon)
+  const imageContainer = document.createElement('div');
+  imageContainer.className = `aspect-[16/9] rounded-md overflow-hidden ${backgroundColor} flex items-center justify-center`;
 
   // Icon
   const iconContainer = document.createElement('div');
-  iconContainer.className = 'w-8 h-8 text-white opacity-80';
+  iconContainer.className = 'w-12 h-12 text-white opacity-80';
 
   // Get icon from icon map
   const iconCreator = iconMap[iconName];
@@ -33,27 +33,25 @@ export function createCardCategory(data: CategoryCardData): HTMLElement {
     iconContainer.appendChild(icon);
   }
 
-  bgLayer.appendChild(iconContainer);
+  imageContainer.appendChild(iconContainer);
 
-  // Bottom overlay with gradient
-  const overlay = document.createElement('div');
-  overlay.className = `
-    absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3
-  `.trim().replace(/\s+/g, ' ');
+  // Content section (below the image)
+  const contentSection = document.createElement('div');
+  contentSection.className = 'mt-2 flex flex-col gap-1';
 
   // Category name
   const nameEl = document.createElement('div');
-  nameEl.className = 'text-white font-bold text-sm md:text-base mb-1 truncate';
+  nameEl.className = 'text-white font-bold text-sm md:text-base truncate';
   nameEl.textContent = categoryName;
 
   // Viewer count
   const viewerEl = document.createElement('div');
-  viewerEl.className = 'text-white/70 text-xs mb-2';
+  viewerEl.className = 'text-white/70 text-xs';
   viewerEl.textContent = `${viewerCount} watching`;
 
   // Chips container
   const chipsContainer = document.createElement('div');
-  chipsContainer.className = 'flex flex-wrap gap-1';
+  chipsContainer.className = 'flex flex-wrap gap-1 mt-1';
 
   // Create chip elements
   chips.forEach((chipData) => {
@@ -61,14 +59,14 @@ export function createCardCategory(data: CategoryCardData): HTMLElement {
     chipsContainer.appendChild(chipEl);
   });
 
-  // Assemble overlay
-  overlay.appendChild(nameEl);
-  overlay.appendChild(viewerEl);
-  overlay.appendChild(chipsContainer);
+  // Assemble content section
+  contentSection.appendChild(nameEl);
+  contentSection.appendChild(viewerEl);
+  contentSection.appendChild(chipsContainer);
 
   // Assemble card
-  card.appendChild(bgLayer);
-  card.appendChild(overlay);
+  card.appendChild(imageContainer);
+  card.appendChild(contentSection);
 
   return card;
 }
