@@ -1,198 +1,194 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>Bot Detection Hackathon Demo </title>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f4f4f9;
-            padding: 20px;
-            color: #333;
-        }
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Pixelify+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui;
+      --font-pixel: "Pixelify Sans", ui-sans-serif, system-ui;
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+      /* Layout & Theme */
+      --background: 0 0% 100%;
+      --foreground: 20 14.3% 4.1%;
+      --card: 0 0% 100%;
+      --card-foreground: 20 14.3% 4.1%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 20 14.3% 4.1%;
+      --primary: var(--fpds-color-orange-7);
+      --primary-foreground: 60 9.1% 97.8%;
+      --primary-hover: var(--fpds-color-orange-8);
+      --primary-active: var(--fpds-color-orange-9);
+      --secondary: 60 4.8% 95.9%;
+      --secondary-foreground: 24 9.8% 10%;
+      --muted: 60 4.8% 95.9%;
+      --muted-foreground: 25 5.3% 44.7%;
+      --accent: 60 4.8% 95.9%;
+      --accent-foreground: 24 9.8% 10%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 60 9.1% 97.8%;
+      --border: var(--fpds-color-gray-3);
+      --input: 20 5.9% 90%;
+      --ring: 20 14.3% 4.1%;
+      --radius: 0.5rem;
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
+      /* FPDS Gray */
+      --fpds-color-gray-1: 60 13% 97%;
+      --fpds-color-gray-2: 60 9% 94%;
+      --fpds-color-gray-3: 75 7% 89%;
+      --fpds-color-gray-4: 60 4% 85%;
+      --fpds-color-gray-5: 60 2% 75%;
+      --fpds-color-gray-6: 60 2% 62%;
+      --fpds-color-gray-7: 60 1% 54%;
+      --fpds-color-gray-8: 80 1% 42%;
+      --fpds-color-gray-9: 80 2% 28%;
+      --fpds-color-gray-10: 80 6% 9%;
 
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+      /* FPDS Red */
+      --fpds-color-red-1: 0 83% 98%;
+      --fpds-color-red-2: 3 100% 96%;
+      --fpds-color-red-3: 5 95% 92%;
+      --fpds-color-red-4: 3 100% 90%;
+      --fpds-color-red-5: 4 87% 82%;
+      --fpds-color-red-6: 1 88% 71%;
+      --fpds-color-red-7: 357 93% 63%;
+      --fpds-color-red-8: 353 68% 48%;
+      --fpds-color-red-9: 356 30% 34%;
+      --fpds-color-red-10: 353 94% 13%;
 
-        h2 {
-            margin-top: 0;
-            color: #444;
-            font-size: 1.2rem;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
+      /* FPDS Orange */
+      --fpds-color-orange-1: 15 75% 97%;
+      --fpds-color-orange-2: 24 100% 93%;
+      --fpds-color-orange-3: 23 100% 89%;
+      --fpds-color-orange-4: 17 100% 85%;
+      --fpds-color-orange-5: 15 98% 77%;
+      --fpds-color-orange-6: 14 91% 65%;
+      --fpds-color-orange-7: 16 90% 54%;
+      --fpds-color-orange-8: 17 85% 40%;
+      --fpds-color-orange-9: 17 62% 29%;
+      --fpds-color-orange-10: 16 82% 11%;
 
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
+      /* FPDS Yellow */
+      --fpds-color-yellow-1: 44 56% 95%;
+      --fpds-color-yellow-2: 38 90% 92%;
+      --fpds-color-yellow-3: 37 81% 85%;
+      --fpds-color-yellow-4: 38 75% 79%;
+      --fpds-color-yellow-5: 36 73% 67%;
+      --fpds-color-yellow-6: 39 64% 49%;
+      --fpds-color-yellow-7: 40 63% 41%;
+      --fpds-color-yellow-8: 41 39% 30%;
+      --fpds-color-yellow-9: 37 77% 22%;
+      --fpds-color-yellow-10: 35 95% 8%;
 
-        .stat-label {
-            color: #666;
-        }
+      /* FPDS Green */
+      --fpds-color-green-1: 130 33% 96%;
+      --fpds-color-green-2: 124 48% 94%;
+      --fpds-color-green-3: 123 38% 89%;
+      --fpds-color-green-4: 125 36% 82%;
+      --fpds-color-green-5: 126 38% 70%;
+      --fpds-color-green-6: 128 33% 54%;
+      --fpds-color-green-7: 132 36% 42%;
+      --fpds-color-green-8: 132 50% 33%;
+      --fpds-color-green-9: 134 58% 21%;
+      --fpds-color-green-10: 131 69% 8%;
 
-        .stat-val {
-            font-weight: bold;
-            font-family: monospace;
-        }
+      /* FPDS Teal */
+      --fpds-color-teal-1: 165 50% 97%;
+      --fpds-color-teal-2: 166 64% 92%;
+      --fpds-color-teal-3: 166 60% 87%;
+      --fpds-color-teal-4: 166 49% 79%;
+      --fpds-color-teal-5: 168 43% 66%;
+      --fpds-color-teal-6: 169 40% 48%;
+      --fpds-color-teal-7: 171 36% 40%;
+      --fpds-color-teal-8: 173 92% 25%;
+      --fpds-color-teal-9: 171 93% 17%;
+      --fpds-color-teal-10: 170 56% 8%;
 
-        .score-container {
-            text-align: center;
-            margin: 20px 0;
-        }
+      /* FPDS Blue */
+      --fpds-color-blue-1: 207 85% 97%;
+      --fpds-color-blue-2: 208 100% 95%;
+      --fpds-color-blue-3: 205 91% 91%;
+      --fpds-color-blue-4: 206 81% 85%;
+      --fpds-color-blue-5: 207 81% 75%;
+      --fpds-color-blue-6: 205 70% 60%;
+      --fpds-color-blue-7: 204 68% 51%;
+      --fpds-color-blue-8: 201 54% 35%;
+      --fpds-color-blue-9: 205 85% 26%;
+      --fpds-color-blue-10: 208 100% 11%;
 
-        .score-big {
-            font-size: 3rem;
-            font-weight: bold;
-        }
+      /* FPDS Purple */
+      --fpds-color-purple-1: 249 78% 98%;
+      --fpds-color-purple-2: 244 88% 97%;
+      --fpds-color-purple-3: 247 87% 94%;
+      --fpds-color-purple-4: 249 73% 90%;
+      --fpds-color-purple-5: 248 92% 85%;
+      --fpds-color-purple-6: 250 69% 75%;
+      --fpds-color-purple-7: 251 55% 68%;
+      --fpds-color-purple-8: 252 43% 56%;
+      --fpds-color-purple-9: 254 26% 39%;
+      --fpds-color-purple-10: 257 55% 17%;
 
-        .score-label {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+      /* FPDS Pink */
+      --fpds-color-pink-1: 343 78% 98%;
+      --fpds-color-pink-2: 344 100% 96%;
+      --fpds-color-pink-3: 346 100% 93%;
+      --fpds-color-pink-4: 345 76% 88%;
+      --fpds-color-pink-5: 343 83% 79%;
+      --fpds-color-pink-6: 340 82% 70%;
+      --fpds-color-pink-7: 338 77% 63%;
+      --fpds-color-pink-8: 336 54% 48%;
+      --fpds-color-pink-9: 336 32% 33%;
+      --fpds-color-pink-10: 337 64% 24%;
 
-        .safe {
-            color: #27ae60;
-        }
+      /* FPDS Neutral */
+      --fpds-color-white: 0 0% 100%;
+      --fpds-color-black: 0 0% 0%;
 
-        .sus {
-            color: #f39c12;
-        }
+      /* FPDS Shadows */
+      --fpds-shadow-100: 0 1px 2px 0 hsl(var(--fpds-color-gray-10) / 3%);
+      --fpds-shadow-200: 0 1px 2px 0 hsl(var(--fpds-color-gray-10) / 5%);
+      --fpds-shadow-300: 0 1px 3px 0 hsl(var(--fpds-color-gray-10) / 5%), 0 1px 2px -1px hsl(var(--fpds-color-gray-10) / 5%);
+      --fpds-shadow-400: 0 4px 6px -1px hsl(var(--fpds-color-gray-10) / 5%), 0 2px 4px -2px hsl(var(--fpds-color-gray-10) / 5%);
+      --fpds-shadow-500: 0 10px 15px -3px hsl(var(--fpds-color-gray-10) / 5%), 0 4px 6px -4px hsl(var(--fpds-color-gray-10) / 5%);
+      --fpds-shadow-600: 0 20px 25px -5px hsl(var(--fpds-color-gray-10) / 5%), 0 8px 10px -6px hsl(var(--fpds-color-gray-10) / 5%);
+      --fpds-shadow-700: 0 25px 50px -12px hsl(var(--fpds-color-gray-10) / 10%);
+      --fpds-shadow-inset-100: inset 0 1px 2px 0 hsl(var(--fpds-color-gray-10) / 2%);
+      --fpds-shadow-inset-200: inset 0 3px 3px 0 hsl(var(--fpds-color-gray-10) / 3%);
+      --fpds-shadow-inset-300: inset 0 2px 0 0 hsl(var(--fpds-color-gray-10) / 10%);
+      --fpds-shadow-inset-tr-100: inset 0 1px 2px 0 hsl(var(--fpds-color-gray-10) / 2%), inset -1px 0 2px 0 hsl(var(--fpds-color-gray-10) / 2%);
+      --fpds-shadow-inset-t-white-100: inset 0 1px 0 hsl(var(--fpds-color-white) / 10%);
+      --fpds-shadow-inset-t-white-200: inset 0 1px 0 hsl(var(--fpds-color-white) / 20%);
+      --fpds-shadow-inset-t-black-100: inset 0 1px 0 hsl(var(--fpds-color-black) / 2%);
+      --fpds-shadow-inset-t-black-200: inset 0 1px 0 hsl(var(--fpds-color-black) / 3%);
+      --fpds-shadow-inset-t-black-300: inset 0 1px 0 hsl(var(--fpds-color-black) / 5%);
+      --fpds-shadow-inset-b-black-100: inset 0 -1px 0 hsl(var(--fpds-color-black) / 2%);
+      --fpds-shadow-inset-b-black-200: inset 0 -1px 0 hsl(var(--fpds-color-black) / 3%);
+      --fpds-shadow-inset-t-black-300: inset 0 2px 0 0 hsl(var(--fpds-color-black) / 5%);
+      --fpds-shadow-button: var(--fpds-shadow-inset-t-white-200), var(--fpds-shadow-inset-b-black-100), var(--fpds-shadow-100);
+    }
 
-        .bot {
-            color: #c0392b;
-        }
+    body {
+      font-family: var(--font-sans);
+    }
 
-        button {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin-top: 20px;
-            background: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background: #34495e;
-        }
-
-        button:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-        }
-
-        a {
-            display: inline-block;
-            margin: 20px 0;
-            padding: 12px 24px;
-            background: #00d4ff;
-            color: #080a0f;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
-        }
-
-        a:hover {
-            background: #00b8e6;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
-        }
-
-
-        #final-section {
-            display: none;
-            border: 2px solid #2c3e50;
-        }
-    </style>
+    .font-pixel {
+      font-family: var(--font-pixel);
+    }
+  </style>
+  <title>Click.com</title>
 </head>
 
-<body>
-
-    <div class="container">
-        <h1>🤖 Bot Detection Lab</h1>
-        <p>Move your mouse, type keys (use Tab!), and interact with the page.</p>
-
-        <a href="visualization.html">
-            🎨 View Amazing Visualization
-        </a>
-
-        <div class="grid">
-            <div class="card">
-                <h2>Live Monitor (1s Window)</h2>
-                <div class="score-container">
-                    <div id="live-score" class="score-big safe">0.00</div>
-                    <div class="score-label">Current Suspicion</div>
-                </div>
-                <div id="live-stats">
-                    <div class="stat-row">Waiting for input...</div>
-                </div>
-            </div>
-
-            <div id="final-section" class="card">
-                <h2>Final Verdict (Full Session)</h2>
-                <div class="score-container">
-                    <div id="final-score" class="score-big">---</div>
-                    <div id="final-verdict" class="score-label">---</div>
-                </div>
-                <div id="final-stats"></div>
-            </div>
-        </div>
-
-        <button id="calc-btn">🛑 Calculate My Score</button>
-    </div>
-
-    <script type="module" src="/src/main.ts"></script>
-    <script>
-        // Initialize the agent on page load.
-        const fpPromise = import(
-            "https://metrics.sedanuryildiz.com/web/v3/PRLJVpMKNqhuHYqumzjb"
-        ).then((FingerprintJS) =>
-            FingerprintJS.load({
-                region: "eu",
-            })
-        );
-
-        // Get the visitorId when you need it.
-        fpPromise
-            .then((fp) => fp.get())
-            .then((result) => {
-                const visitorId = result.visitorId;
-                console.log(visitorId);
-            });
-
-
-    </script>
+<body class="font-sans bg-gray-1000 text-gray-300 overflow-clip">
+  <div id="app"></div>
+  <script type="module" src="/src/click.ts"></script>
 </body>
-
-
 
 </html>
